@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <UserSecretsId>aspnet-shop-E13966AF-C1DE-4520-9082-10A9462C57A1</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Update="app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.2"/>
+    </ItemGroup>
+
+</Project>
