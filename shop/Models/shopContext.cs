@@ -33,7 +33,7 @@ namespace shop.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=shop3;User Id=SA;Password=Gtm#Dpi7Zwt;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=shop;User Id=SA;Password=YourNewStrong@Passw0rd;");
             }
         }
 
