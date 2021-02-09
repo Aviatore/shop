@@ -91,7 +91,6 @@ insert into books_ordered (order_id, book_id) VALUES (6, 2);
 insert into books_ordered (order_id, book_id) VALUES (6, 1);
 insert into books_ordered (order_id, book_id) VALUES (6, 3);
 insert into books_ordered (order_id, book_id) VALUES (7, 4);
-insert into books_ordered (order_id, book_id) VALUES (9, 2);
 
 insert into author_book (book_id, author_id) values (1, 1);
 insert into author_book (book_id, author_id) values (1, 2);
@@ -104,4 +103,3 @@ insert into author_book (book_id, author_id) values (7, 9);
 insert into author_book (book_id, author_id) values (8, 6);
 insert into author_book (book_id, author_id) values (10, 4);
 insert into author_book (book_id, author_id) values (10, 5);
-
