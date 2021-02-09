@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210209173106_secondSnapshot")]
+    partial class secondSnapshot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,11 +30,11 @@ namespace shop.Migrations
                         .HasColumnName("address_id")
                         .UseIdentityColumn();
 
-                    b.Property<int?>("City")
+                    b.Property<int?>("CityId")
                         .HasColumnType("int")
                         .HasColumnName("city");
 
-                    b.Property<int?>("Country")
+                    b.Property<int?>("CountryId")
                         .HasColumnType("int")
                         .HasColumnName("country");
 
@@ -103,11 +105,6 @@ namespace shop.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("author");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("description");
 
                     b.Property<int?>("GenreId")
                         .HasColumnType("int")
