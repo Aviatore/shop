@@ -33,7 +33,7 @@ namespace shop.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=testShop;User Id=SA;Password=Gtm#Dpi7zwt;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=shop2;User Id=SA;Password=Gtm#Dpi7Zwt;");
             }
         }
 
@@ -47,9 +47,15 @@ namespace shop.Models
 
                 entity.Property(e => e.AddressId).HasColumnName("address_id");
 
-                entity.Property(e => e.City).HasColumnName("city");
+                entity.Property(e => e.City)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("city");
 
-                entity.Property(e => e.Country).HasColumnName("country");
+                entity.Property(e => e.Country)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("country");
 
                 entity.Property(e => e.Street)
                     .HasMaxLength(100)
@@ -103,13 +109,13 @@ namespace shop.Models
 
                 entity.Property(e => e.BookId).HasColumnName("book_id");
 
-                entity.Property(e => e.Author)
-                    .HasMaxLength(100)
-                    .HasColumnName("author");
-                
                 entity.Property(e => e.Description)
-                    .HasMaxLength(100)
+                    .HasMaxLength(1000)
                     .HasColumnName("description");
+                
+                entity.Property(e => e.FigUrl)
+                    .HasMaxLength(400)
+                    .HasColumnName("fig_url");
 
                 entity.Property(e => e.GenreId).HasColumnName("genre_id");
 
@@ -174,6 +180,10 @@ namespace shop.Models
                 entity.ToTable("logs");
 
                 entity.Property(e => e.LogId).HasColumnName("log_id");
+
+                entity.Property(e => e.Timestamp)
+                    .IsRequired()
+                    .HasColumnName("timestamp");
 
                 entity.Property(e => e.Msg)
                     .IsRequired()

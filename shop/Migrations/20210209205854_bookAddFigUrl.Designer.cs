@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210209205854_bookAddFigUrl")]
+    partial class bookAddFigUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,16 +30,12 @@ namespace shop.Migrations
                         .HasColumnName("address_id")
                         .UseIdentityColumn();
 
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)")
+                    b.Property<int?>("City")
+                        .HasColumnType("int")
                         .HasColumnName("city");
 
-                    b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)")
+                    b.Property<int?>("Country")
+                        .HasColumnType("int")
                         .HasColumnName("country");
 
                     b.Property<string>("Street")
@@ -103,14 +101,19 @@ namespace shop.Migrations
                         .HasColumnName("book_id")
                         .UseIdentityColumn();
 
+                    b.Property<string>("Author")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("author");
+
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("description");
 
                     b.Property<string>("FigUrl")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("fig_url");
 
                     b.Property<int?>("GenreId")
@@ -195,10 +198,6 @@ namespace shop.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("order_id");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("timestamp");
 
                     b.HasKey("LogId");
 

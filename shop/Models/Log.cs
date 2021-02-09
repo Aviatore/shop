@@ -10,6 +10,7 @@ namespace shop.Models
         public int LogId { get; set; }
         public int OrderId { get; set; }
         public string Msg { get; set; }
+        public DateTime Timestamp { get; set; }
 
         public virtual Order Order { get; set; }
     }
