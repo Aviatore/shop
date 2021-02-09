@@ -28,6 +28,35 @@ namespace shop.Controllers
             return View();
         }
 
+        public IActionResult ShoppingCart()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CheckOut(int orderId)
+        {
+            Checkout checkout = new Checkout();
+            checkout.OrderId = orderId;
+            return View(checkout);
+        }
+
+        [HttpPost]
+        public IActionResult CheckOut(Checkout checkout)
+        {
+            if (ModelState.IsValid) { //checking model state
+                //add checkout to db 
+                
+                return RedirectToAction("Payment");
+            }
+            return View("CheckOut");
+        }
+
+        public IActionResult Payment()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
