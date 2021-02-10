@@ -37,8 +37,8 @@ namespace shop.Controllers
 
         public IActionResult BooksByGenre(int genreId)
         {
-            IEnumerable<Book> booksListByGenre = _dbContext.Books.Include(p => p.Publisher).Where(gId => gId.GenreId == genreId);
-            
+            IEnumerable<Book> booksListByGenre = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).Where(gId => gId.GenreId == genreId);
+
             return View(booksListByGenre);
         }
 

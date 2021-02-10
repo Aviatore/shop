@@ -15,7 +15,7 @@
                     <ul>
                         @foreach (var genre in Model.Genres)
                         {
-                            <li><a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName.</a></li>
+                            <li><a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName</a></li>
                         }
                     </ul>
                 }
