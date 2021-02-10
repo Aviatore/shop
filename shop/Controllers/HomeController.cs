@@ -25,21 +25,32 @@ namespace shop.Controllers
 
         public IActionResult Index()
         {
-            BookGenre bookGenre = new BookGenre();
+            BookGenrePublisher bookGenrePublisher = new BookGenrePublisher();
+            IEnumerable<Publisher> publishersList = _dbContext.Publishers;
             IEnumerable<Genre> genresList = _dbContext.Genres;
             IEnumerable<Book> booksList = _dbContext.Books.Include(g => g.Genre).Include(p => p.Publisher);
 
-            bookGenre.Genres = genresList;
-            bookGenre.Books = booksList;
-            
-            return View(bookGenre);
-        }
+            bookGenrePublisher.Publishers = publishersList;
+            bookGenrePublisher.Genres = genresList;
+            bookGenrePublisher.Books = booksList;
 
+            return View(bookGenrePublisher);
+        }
+        
         public IActionResult BooksByGenre(int genreId)
         {
             IEnumerable<Book> booksListByGenre = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).Where(gId => gId.GenreId == genreId);
-
+            ViewData["genreName"] = _dbContext.Genres.FirstOrDefault(g => g.GenreId == genreId)?.GenreName;
+            
             return View(booksListByGenre);
+        }
+
+        public IActionResult BooksByPublisher(int publisherId)
+        {
+            IEnumerable<Book> booksListByPublisher = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).Where(pId => pId.PublisherId == publisherId);
+            ViewData["publisherName"] = _dbContext.Publishers.FirstOrDefault(p => p.PublisherId == publisherId)?.PublisherName;
+            
+            return View(booksListByPublisher);
         }
 
         public IActionResult Privacy()
@@ -52,5 +63,6 @@ namespace shop.Controllers
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
+        
     }
 }

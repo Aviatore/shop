@@ -1,4 +1,4 @@
-﻿@model BookGenre
+﻿@model BookGenrePublisher
 
 @{
     ViewData["Title"] = "Books List";
@@ -15,11 +15,41 @@
                     <ul>
                         @foreach (var genre in Model.Genres)
                         {
-                            <li><a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName</a></li>
+                            <li>
+                                <a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName</a>
+                            </li>
                         }
                     </ul>
                 }
             }
+
+            <p class="font-weight-bold">Filter by publisher:</p>
+            @if (Model.Publishers.Any())
+            {
+            <ul>
+                @foreach (var publisher in Model.Publishers)
+                {
+                    <li>
+                        <a asp-controller="Home" asp-action="BooksByPublisher" asp-route-publisherId="@publisher.PublisherId">@publisher.PublisherName</a>
+                    </li>
+                }
+            </ul>
+            }
+
+            @using (Html.BeginForm("BooksByGenre", "Home", FormMethod.Post))
+            {
+                List<SelectListItem> listItems= new List<SelectListItem>();
+                @foreach (var genre in Model.Genres)
+                {
+                    listItems.Add(new SelectListItem
+                    {
+                        Text = genre.GenreName,
+                        Value = genre.GenreId.ToString()
+                    });
+                }
+                @Html.DropDownListFor(model => model.Genres, listItems, "-- Select Genre --", new {style="height:200px;", onchange = "this.form.submit();"})
+            }
+
         </div>
         <div class="col-10 text-center">
             <h1 class="display-6">Books List</h1>
