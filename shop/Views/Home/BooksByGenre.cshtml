@@ -1,0 +1,35 @@
+@model BookGenre
+
+@{
+    ViewData["Title"] = "Books by Genre";
+}
+
+<div class="text-center">
+    <h1 class="display-6">@ViewData["Title"]</h1>
+    @if (Model.Books.Any())
+                {
+                    <table class="table table-bordered table-striped" style="width: 100%;">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Genre</th>
+                            <th>Publisher</th>
+                            <th>Price</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var obj in Model.Books)
+                        {
+                            <tr>
+                                <td class="text-left">@obj.Title</td>
+                                <td class="text-justify">@obj.Description</td>
+                                <td>@obj.Genre.GenreName</td>
+                                <td>@obj.Publisher.PublisherName</td>
+                                <td class="text-nowrap">@obj.Price zł</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+</div>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
@@ -14,7 +16,6 @@ namespace shop.Models
         public string FigUrl { get; set; }
         public int? PublisherId { get; set; }
         public double Price { get; set; }
-
         public virtual Genre Genre { get; set; }
         public virtual Publisher Publisher { get; set; }
     }
