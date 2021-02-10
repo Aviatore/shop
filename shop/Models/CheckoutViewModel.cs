@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+// using shop.CustomValidation;
 
 namespace shop.Models
 {
-    public class Checkout
+    public class CheckoutViewModel
     {
-        public int OrderId { get; set; }
+        // public int OrderId { get; set; }
         
         [Required]
         public string Name { get; set; }
@@ -14,9 +15,9 @@ namespace shop.Models
         public string Email { get; set; }
 
         [Display(Name = "Phone number")]
-        [DataType(DataType.PhoneNumber)]
+        [Phone]
         [Required]
-        public int Phone { get; set; }
+        public string Phone { get; set; }
         
         
         [Display(Name = "Country")]
@@ -37,6 +38,12 @@ namespace shop.Models
         public string BillingAddress { get; set; }
         
         
+        [Display(Name = "Shipping address is different than my billing address.")]
+        [Required]
+        public bool BillingDifferentThanShipping { get; set; }
+
+        //TODO: requiredWhen
+        // [RequiredWhen("BillingDifferentThanShipping", true)]
         [Display(Name = "Country")]
         public string ShippingCountry { get; set; }
         
