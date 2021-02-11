@@ -10,7 +10,52 @@
 </div>
 
 @* TODO: here a table with shopping cart to confirm & edit *@
-
+<div>
+    <table>
+        <tr>
+            <
+            <th>
+                Title
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Amount
+            </th>
+            <th>
+                Total Price
+            </th>
+        </tr>
+        @foreach (var book in Model.ShoppingCartViewModel.AnonymousBasket)
+        {
+            <tr>
+                @* <td> *@
+                @*     @book.BookId *@
+                @* </td> *@
+                @* TODO: book title from db?*@
+                <td>
+                    @book.Title
+                </td>
+                <td>
+                    @book.Price
+                </td>
+                <td>
+                    @book.Amount
+                </td>
+                <td>
+                    @(book.Price * book.Amount)
+                </td>
+                @* <td> *@
+                @*     @* *@
+                @*         @Html.ActionLink("szczegóły", "Details", "Home", new { id = employee.Id }) *@
+                @*     *@ 
+                @* <a asp-controller="Home" asp-action="Details" asp-route-id="@employee.Id"> szczegóły </a> *@
+                @* </td> *@
+            </tr>
+        }
+    </table>
+</div>
 
 <div class="col-md-offset-2 col-md-10">
     <input type="submit" value="Checkout" class="btn btn-primary btn-block" id="checkout-btn" />
