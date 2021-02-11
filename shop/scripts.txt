@@ -1,0 +1,2 @@
+# Update the database structure according to the last snapshot
+dotnet ef database update --context shopContext

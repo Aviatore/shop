@@ -1,8 +1,84 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model BookGenrePublisher
+
+@{
+    ViewData["Title"] = "Books List";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2">
+            <h1 class="display-6">&nbsp;</h1>
+            <p class="font-weight-bold">Filter by genre:</p>
+            @{
+                if (Model.Genres.Any())
+                {
+                    <ul>
+                        @foreach (var genre in Model.Genres)
+                        {
+                            <li>
+                                <a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName</a>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+
+            <p class="font-weight-bold">Filter by publisher:</p>
+            @if (Model.Publishers.Any())
+            {
+            <ul>
+                @foreach (var publisher in Model.Publishers)
+                {
+                    <li>
+                        <a asp-controller="Home" asp-action="BooksByPublisher" asp-route-publisherId="@publisher.PublisherId">@publisher.PublisherName</a>
+                    </li>
+                }
+            </ul>
+            }
+
+            @using (Html.BeginForm("BooksByGenre", "Home", FormMethod.Post))
+            {
+                List<SelectListItem> listItems= new List<SelectListItem>();
+                @foreach (var genre in Model.Genres)
+                {
+                    listItems.Add(new SelectListItem
+                    {
+                        Text = genre.GenreName,
+                        Value = genre.GenreId.ToString()
+                    });
+                }
+                @Html.DropDownListFor(model => model.Genres, listItems, "-- Select Genre --", new {style="height:200px;", onchange = "this.form.submit();"})
+            }
+
+        </div>
+        <div class="col-10 text-center">
+            <h1 class="display-6">Books List</h1>
+            @if (Model.Books.Any())
+            {
+                <table class="table table-bordered table-striped" style="width: 100%;">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Genre</th>
+                        <th>Publisher</th>
+                        <th>Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var obj in Model.Books)
+                    {
+                        <tr>
+                            <td class="text-left">@obj.Title</td>
+                            <td class="text-justify">@obj.Description</td>
+                            <td>@obj.Genre.GenreName</td>
+                            <td>@obj.Publisher.PublisherName</td>
+                            <td class="text-nowrap">@obj.Price zł</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
 </div>
