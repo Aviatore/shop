@@ -58,6 +58,32 @@ namespace shop.Controllers
             return View();
         }
 
+        public IActionResult ShoppingCart()
+        {
+            OrderViewModel order = new OrderViewModel();
+            order.OrderId = 1;
+            return View(order);
+        }
+        
+        [HttpPost]
+        public IActionResult CheckOut(OrderViewModel order)
+        {
+            var orderdd = order;
+            if (ModelState.IsValid) { //checking model state
+                    
+                //TODO: add full order to db 
+                
+                return RedirectToAction("Payment", orderdd);
+            }
+            return View("ShoppingCart");
+        }
+
+        public IActionResult Payment(OrderViewModel order)
+        {
+            var orderss = order;
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

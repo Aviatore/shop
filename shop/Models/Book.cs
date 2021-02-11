@@ -1,4 +1,5 @@
 ﻿using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -20,3 +21,4 @@ namespace shop.Models
         public virtual Publisher Publisher { get; set; }
     }
 }
+
