@@ -18,11 +18,19 @@ namespace shop.Models
         [Required]
         public DataType CardExp { get; set; }
         
-        
         [Display(Name = "CVV")]
         [Required]
         [Range(3,3)]
         public int CardCVV { get; set; }
+        
+        public int OrderId { get; set; }
+        public double TotalPrice { get; set; }
+
+        public PaymentViewModel(int oderId, double totalPrice)
+        {
+            OrderId = oderId;
+            TotalPrice = totalPrice;
+        }
         
     }
 }
