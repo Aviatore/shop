@@ -36,6 +36,19 @@ namespace shop.Controllers
 
             return View(bookGenrePublisher);
         }
+
+        public IActionResult BookDetails(int bookId)
+        {
+            var booksListById = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).FirstOrDefault(bId => bId.BookId == bookId);
+
+            return View(booksListById);
+        }
+        
+        [HttpPost]  
+        public IActionResult RedirectToBooksByGenre()  
+        {
+            return RedirectToAction("BooksByGenre", "Home", new {genreId = HttpContext.Request.Form["Genres"]});
+        }  
         
         public IActionResult BooksByGenre(int genreId)
         {
@@ -44,6 +57,12 @@ namespace shop.Controllers
             
             return View(booksListByGenre);
         }
+        
+        [HttpPost]  
+        public IActionResult RedirectToBooksByPublishers()  
+        {
+            return RedirectToAction("BooksByPublisher", "Home", new {publisherId = HttpContext.Request.Form["Publishers"]});
+        }  
 
         public IActionResult BooksByPublisher(int publisherId)
         {

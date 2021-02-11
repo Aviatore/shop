@@ -7,38 +7,11 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-2">
-            <h1 class="display-6">&nbsp;</h1>
+            <h3 class="display-6">&nbsp;</h3>
             <p class="font-weight-bold">Filter by genre:</p>
-            @{
-                if (Model.Genres.Any())
-                {
-                    <ul>
-                        @foreach (var genre in Model.Genres)
-                        {
-                            <li>
-                                <a asp-controller="Home" asp-action="BooksByGenre" asp-route-genreId="@genre.GenreId">@genre.GenreName</a>
-                            </li>
-                        }
-                    </ul>
-                }
-            }
-
-            <p class="font-weight-bold">Filter by publisher:</p>
-            @if (Model.Publishers.Any())
+            @using (Html.BeginForm("RedirectToBooksByGenre", "Home", FormMethod.Post))
             {
-            <ul>
-                @foreach (var publisher in Model.Publishers)
-                {
-                    <li>
-                        <a asp-controller="Home" asp-action="BooksByPublisher" asp-route-publisherId="@publisher.PublisherId">@publisher.PublisherName</a>
-                    </li>
-                }
-            </ul>
-            }
-
-            @using (Html.BeginForm("BooksByGenre", "Home", FormMethod.Post))
-            {
-                List<SelectListItem> listItems= new List<SelectListItem>();
+                List<SelectListItem> listItems = new List<SelectListItem>();
                 @foreach (var genre in Model.Genres)
                 {
                     listItems.Add(new SelectListItem
@@ -47,36 +20,56 @@
                         Value = genre.GenreId.ToString()
                     });
                 }
-                @Html.DropDownListFor(model => model.Genres, listItems, "-- Select Genre --", new {style="height:200px;", onchange = "this.form.submit();"})
+                @Html.DropDownListFor(model => model.Genres, listItems, "-- Select Genre --", new {style = "width: 170px;", onchange = "this.form.submit();"})
+            }
+            <p>&nbsp;</p>
+            <p class="font-weight-bold">Filter by publisher:</p>
+            @using (Html.BeginForm("RedirectToBooksByPublishers", "Home", FormMethod.Post))
+            {
+                List<SelectListItem> listItems = new List<SelectListItem>();
+                @foreach (var publisher in Model.Publishers)
+                {
+                    listItems.Add(new SelectListItem
+                    {
+                        Text = publisher.PublisherName,
+                        Value = publisher.PublisherId.ToString()
+                    });
+                }
+                @Html.DropDownListFor(model => model.Publishers, listItems, "-- Select Publisher --", new {style = "width: 170px;", onchange = "this.form.submit();"})
             }
 
         </div>
         <div class="col-10 text-center">
-            <h1 class="display-6">Books List</h1>
+            <h3 class="display-6">Books List</h3>
             @if (Model.Books.Any())
             {
-                <table class="table table-bordered table-striped" style="width: 100%;">
-                    <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Genre</th>
-                        <th>Publisher</th>
-                        <th>Price</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+                <table class="table table-striped table-hover">
                     @foreach (var obj in Model.Books)
                     {
                         <tr>
-                            <td class="text-left">@obj.Title</td>
-                            <td class="text-justify">@obj.Description</td>
-                            <td>@obj.Genre.GenreName</td>
-                            <td>@obj.Publisher.PublisherName</td>
-                            <td class="text-nowrap">@obj.Price zł</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <span class="font-weight-bolder"><a asp-controller="Home" asp-action="BookDetails" asp-route-bookId="@obj.BookId">@obj.Title</a></span><br><a asp-controller="Home" asp-action="BookDetails" asp-route-bookId="@obj.BookId"><img src="@obj.FigUrl" alt="@obj.Title" style="width: 150px"></a>
+                                    </div>
+                                    <div class="col-md-5 text-left">
+                                        <p>&nbsp;</p>
+                                        <p>Genre: @obj.Genre.GenreName<br>Publisher: @obj.Publisher.PublisherName<br>Price: @obj.Price zł</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 text-center">
+                                        <p></p>
+                                        <form>
+                                            <label for="quantity">Quantity: </label>
+                                            <input id="quantity" name="quantity" type="number" value="1" man="1" max="1000" step="1" style="width: 60px;"><br/>
+                                            <input type="button" value="Add to basket" class="btn btn-primary">
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     }
-                    </tbody>
                 </table>
             }
         </div>
