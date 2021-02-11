@@ -44,16 +44,20 @@ namespace shop.Models
 
         //TODO: requiredWhen
         // [RequiredWhen("BillingDifferentThanShipping", true)]
+        // [Required]
         [Display(Name = "Country")]
         public string ShippingCountry { get; set; }
         
+        // [Required]
         [Display(Name = "City")]
         public string ShippingCity { get; set; }
         
+        // [Required]
         [Display(Name = "Zip Code")]
         [RegularExpression(@"^\d{2}(?:[-\s]\d{3})?$")]
         public string ShippingZip { get; set; }
         
+        // [Required]
         [Display(Name = "Address")]
         public string ShippingAddress { get; set; }
     }
