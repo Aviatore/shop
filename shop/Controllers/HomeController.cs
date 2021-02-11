@@ -60,27 +60,24 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            OrderViewModel order = new OrderViewModel();
-            order.OrderId = 1;
+            Order order = new Order();
             return View(order);
         }
         
         [HttpPost]
-        public IActionResult CheckOut(OrderViewModel order)
+        public IActionResult CheckOut(Order order)
         {
-            var orderdd = order;
             if (ModelState.IsValid) { //checking model state
                     
                 //TODO: add full order to db 
                 
-                return RedirectToAction("Payment", orderdd);
+                return RedirectToAction("Payment", order);
             }
             return View("ShoppingCart");
         }
 
-        public IActionResult Payment(OrderViewModel order)
+        public IActionResult Payment(Order order)
         {
-            var orderss = order;
             return View();
         }
 

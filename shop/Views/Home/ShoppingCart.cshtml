@@ -2,60 +2,51 @@
     ViewData["Title"] = "Your Shopping Cart";
 }
 
-@model OrderViewModel
+@model Order
 
 <div class="text-center">
     <h1 class="display-4">Your Shopping Cart</h1>
     @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
 </div>
-
-@* TODO: here a table with shopping cart to confirm & edit *@
-<div>
-    <table>
-        <tr>
-            <
-            <th>
-                Title
-            </th>
-            <th>
-                Price
-            </th>
-            <th>
-                Amount
-            </th>
-            <th>
-                Total Price
-            </th>
-        </tr>
-        @foreach (var book in Model.ShoppingCartViewModel.AnonymousBasket)
-        {
-            <tr>
-                @* <td> *@
-                @*     @book.BookId *@
-                @* </td> *@
-                @* TODO: book title from db?*@
-                <td>
-                    @book.Title
-                </td>
-                <td>
-                    @book.Price
-                </td>
-                <td>
-                    @book.Amount
-                </td>
-                <td>
-                    @(book.Price * book.Amount)
-                </td>
-                @* <td> *@
-                @*     @* *@
-                @*         @Html.ActionLink("szczegóły", "Details", "Home", new { id = employee.Id }) *@
-                @*     *@ 
-                @* <a asp-controller="Home" asp-action="Details" asp-route-id="@employee.Id"> szczegóły </a> *@
-                @* </td> *@
-            </tr>
-        }
-    </table>
-</div>
+@* <div> *@
+@*     <table class="table table-striped"> *@
+@*         <tr> *@
+@*             <th scope="col"> *@
+@*                 Title *@
+@*             </th> *@
+@*             <th scope="col"> *@
+@*                 Unit Price *@
+@*             </th> *@
+@*             <th scope="col"> *@
+@*                 Quantity *@
+@*             </th> *@
+@*             <th scope="col"> *@
+@*                 Price *@
+@*             </th> *@
+@*         </tr> *@
+@*         @foreach (var book in Model.ShoppingCartViewModel.AnonymousBasket) *@
+@*         { *@
+@*             <tr> *@
+@*                 <td> *@
+@*                     @book.Title *@
+@*                 </td> *@
+@*                 <td> *@
+@*                     @book.Price *@
+@*                 </td> *@
+@*                 <td> *@
+@*                     @book.Quantity *@
+@*                 </td> *@
+@*                 <td> *@
+@*                     @(book.Price * book.Quantity) *@
+@*                 </td> *@
+@*             </tr> *@
+@*         } *@
+@*         <tr> *@
+@*           <td colspan="3" class="text-right font-weight-bold">Total Price</td> *@
+@*           <td>@Model.ShoppingCartViewModel.TotalPrice()</td> *@
+@*         </tr> *@
+@*     </table> *@
+@* </div> *@
 
 <div class="col-md-offset-2 col-md-10">
     <input type="submit" value="Checkout" class="btn btn-primary btn-block" id="checkout-btn" />
@@ -71,104 +62,102 @@
         @Html.HiddenFor(model => model.OrderId)
 
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.User.UserName, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.Name, new { htmlAttributes = new { @class = "form-control", placeholder = "Alex Smith" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.Name, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.User.UserName, new { htmlAttributes = new { @class = "form-control", placeholder = "Alex Smith" } })
+                @Html.ValidationMessageFor(model => model.User.UserName, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.User.Email, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.Email, new { htmlAttributes = new { @class = "form-control", placeholder = "asmith@host.com" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.Email, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.User.Email, new { htmlAttributes = new { @class = "form-control", placeholder = "asmith@host.com" } })
+                @Html.ValidationMessageFor(model => model.User.Email, "", new { @class = "text-danger" })
             </div>
         </div>
         
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.Phone, htmlAttributes: new { @class = "control-label col-md-10" })
+            @Html.LabelFor(model => model.User.Phone, htmlAttributes: new { @class = "control-label col-md-10" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.Phone, new { htmlAttributes = new { @class = "form-control", placeholder = "123456789" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.Phone, "", new { @class = "text-danger" })
+                @Html.EditorFor(model => model.User.Phone, new { htmlAttributes = new { @class = "form-control", placeholder = "123456789" } })
+                @Html.ValidationMessageFor(model => model.User.Phone, "", new { @class = "text-danger" })
             </div>
         </div>
         
         <h4>Billing Address</h4>
         <hr />
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.BillingCountry, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.BillingAddress.Country, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.BillingCountry, new { id = "bill-country", htmlAttributes = new { @class = "form-control", placeholder = "Denmark" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.BillingCountry, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.BillingAddress.Country, new { id = "bill-country", @placeholder = "Denmark", @class = "form-control"})
+                @Html.ValidationMessageFor(model => model.BillingAddress.Country, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.BillingCity, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.BillingAddress.City, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.BillingCity, new { id = "bill-city", htmlAttributes = new { @class = "form-control", placeholder = "Copenhagen" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.BillingCity, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.BillingAddress.City, new { id = "bill-city", @class = "form-control", placeholder = "Copenhagen" })
+                @Html.ValidationMessageFor(model => model.BillingAddress.City, "", new { @class = "text-danger" })
             </div>
         </div>
         
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.BillingZip, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.BillingAddress.ZipCode, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.BillingZip, new { id = "bill-zip", htmlAttributes = new { @class = "form-control", placeholder = "303-045" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.BillingZip, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.BillingAddress.ZipCode, new { id = "bill-zip", @class = "form-control", placeholder = "303-045" })
+                @Html.ValidationMessageFor(model => model.BillingAddress.ZipCode, "", new { @class = "text-danger" })
             </div>
         </div>
         
         <div class="form-group">
-            @Html.LabelFor(model => model.CheckoutViewModel.BillingAddress, htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.LabelFor(model => model.BillingAddress.Street, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CheckoutViewModel.BillingAddress, new { id = "bill-address", htmlAttributes = new { @class = "form-control", placeholder = "Blau 23/5" } })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.BillingAddress, "", new { @class = "text-danger" })
+                @Html.TextBoxFor(model => model.BillingAddress.Street, new { id = "bill-address", @class = "form-control", placeholder = "Blau 23/5"})
+                @Html.ValidationMessageFor(model => model.BillingAddress.Street, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-10">
-                @Html.CheckBoxFor(model => model.CheckoutViewModel.BillingDifferentThanShipping, new { id = "shipping-checkbox", htmlAttributes = new { @class = "form-control"} })
-                @Html.LabelFor(model => model.CheckoutViewModel.BillingDifferentThanShipping, htmlAttributes: new { @class = "control-label col-md-5" })
-                @Html.ValidationMessageFor(model => model.CheckoutViewModel.BillingDifferentThanShipping, "", new { @class = "text-danger" })
+                <input type="checkbox" id = "shipping-checkbox" class = "form-control">Check this box if Billing Address and Shipping Address are the same.
             </div>
         </div>
         
-        <div id="shipping-form" class="d-none">
+        <div id="shipping-form">
             <h4>Shipping Address</h4>
             <hr />
             
             <div class="form-group">
-                @Html.LabelFor(model => model.CheckoutViewModel.ShippingCountry, htmlAttributes: new {@class = "control-label col-md-2"})
+                @Html.LabelFor(model => model.ShippingAddress.Country, htmlAttributes: new {@class = "control-label col-md-2"})
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.CheckoutViewModel.ShippingCountry, new { id = "shipp-country", htmlAttributes = new {@class = "form-control", placeholder = "Denmark"}})
-                    @Html.ValidationMessageFor(model => model.CheckoutViewModel.ShippingCountry, "", new {@class = "text-danger"})
+                    @Html.TextBoxFor(model => model.ShippingAddress.Country, new { id = "shipp-country", @placeholder = "Denmark", @class = "form-control"})
+                    @Html.ValidationMessageFor(model => model.ShippingAddress.Country, "", new {@class = "text-danger"})
                 </div>
             </div>
 
             <div class="form-group">
-                @Html.LabelFor(model => model.CheckoutViewModel.ShippingCity, htmlAttributes: new {@class = "control-label col-md-2"})
+                @Html.LabelFor(model => model.ShippingAddress.City, htmlAttributes: new {@class = "control-label col-md-2"})
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.CheckoutViewModel.ShippingCity, new { id = "shipp-city", htmlAttributes = new {@class = "form-control", placeholder = "Copenhagen"}})
-                    @Html.ValidationMessageFor(model => model.CheckoutViewModel.ShippingCity, "", new {@class = "text-danger"})
+                    @Html.TextBoxFor(model => model.ShippingAddress.City, new { id = "shipp-city", @class = "form-control", placeholder = "Copenhagen"})
+                    @Html.ValidationMessageFor(model => model.ShippingAddress.City, "", new {@class = "text-danger"})
                 </div>
             </div>
 
             <div class="form-group">
-                @Html.LabelFor(model => model.CheckoutViewModel.ShippingZip, htmlAttributes: new {@class = "control-label col-md-2"})
+                @Html.LabelFor(model => model.ShippingAddress.ZipCode, htmlAttributes: new {@class = "control-label col-md-2"})
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.CheckoutViewModel.ShippingZip, new { id = "shipp-zip", htmlAttributes = new {@class = "form-control", placeholder = "303-045"}})
-                    @Html.ValidationMessageFor(model => model.CheckoutViewModel.ShippingZip, "", new {@class = "text-danger"})
+                    @Html.TextBoxFor(model => model.ShippingAddress.ZipCode, new { id = "shipp-zip", @class = "form-control", placeholder = "303-045"})
+                    @Html.ValidationMessageFor(model => model.ShippingAddress.ZipCode, "", new {@class = "text-danger"})
                 </div>
             </div>
 
             <div class="form-group">
-                @Html.LabelFor(model => model.CheckoutViewModel.ShippingAddress, htmlAttributes: new {@class = "control-label col-md-2"})
+                @Html.LabelFor(model => model.ShippingAddress.Street, htmlAttributes: new {@class = "control-label col-md-2"})
                 <div class="col-md-10">
-                    @Html.EditorFor(model => model.CheckoutViewModel.ShippingAddress, new { id = "shipp-address", htmlAttributes = new {@class = "form-control", placeholder = "Blau 23/5"}})
-                    @Html.ValidationMessageFor(model => model.CheckoutViewModel.ShippingAddress, "", new {@class = "text-danger"})
+                    @Html.TextBoxFor(model => model.ShippingAddress.Street, new { id = "shipp-address", @class = "form-control", placeholder = "Blau 23/5"})
+                    @Html.ValidationMessageFor(model => model.ShippingAddress.Street, "", new {@class = "text-danger"})
                 </div>
             </div>
         </div>
