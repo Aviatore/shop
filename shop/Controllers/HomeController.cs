@@ -159,6 +159,7 @@ namespace shop.Controllers
                 _dbContext.Entry(billAdd).GetDatabaseValues();
                 scvm.Order.BillingAddressId = billAdd.AddressId;
                     
+                //TODO: if shipp == bill nie wykonuj tego kodu! 
                 var shipAdd = scvm.Order.ShippingAddress;
                 _dbContext.Addresses.Add(shipAdd);
                 _dbContext.SaveChanges();
@@ -177,12 +178,12 @@ namespace shop.Controllers
                 _dbContext.Entry(order).GetDatabaseValues();
                 int orderId = order.OrderId;
 
-                foreach (var orderedBook in scvm.Basket)
+                foreach (var item in scvm.Basket)
                 {
                     var book = new BooksOrdered();
-                    book.BookId = orderedBook.BookId;
+                    book.BookId = item.BookId;
                     book.OrderId = orderId;
-                    for (var i = 0; i < orderedBook.Quantity; i++)
+                    for (var i = 0; i < item.Quantity; i++)
                     {
                         _dbContext.BooksOrdereds.Add(book);
                     }
