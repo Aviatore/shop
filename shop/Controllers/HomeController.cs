@@ -63,13 +63,13 @@ namespace shop.Controllers
         public IActionResult ShoppingCart()
         {
             List<BookQuantity> booksInBasket = new List<BookQuantity>();
-            foreach (var orderedBook in cookies) // orderedBook.BookId & orderedBook.Quantity
-            {
-                int id = orderedBook.BookId;
-                int quantity = orderedBook.Quantity;
-                BookQuantity bookQuantity = new BookQuantity(_dbContext.Books.FirstOrDefault(b => b.BookId == id), quantity);
-                booksInBasket.Add(bookQuantity);
-            }
+            // foreach (var orderedBook in cookies) // orderedBook.BookId & orderedBook.Quantity
+            // {
+            //     int id = orderedBook.BookId;
+            //     int quantity = orderedBook.Quantity;
+            //     BookQuantity bookQuantity = new BookQuantity(_dbContext.Books.FirstOrDefault(b => b.BookId == id), quantity);
+            //     booksInBasket.Add(bookQuantity);
+            // }
             ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel(booksInBasket);
             return View(shoppingCartVM);
         }
@@ -113,11 +113,11 @@ namespace shop.Controllers
             return RedirectToAction("OrderConfirmation", false);
         }
 
-        public IActionResult OrderConfirmation(bool success)
-        {
-            // TODO: error or order details => order in JSON, email
-            
-        }
+        // public IActionResult OrderConfirmation(bool success)
+        // {
+        //     // TODO: error or order details => order in JSON, email
+        //     return View();
+        // }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
