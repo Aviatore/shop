@@ -1,4 +1,5 @@
 ﻿using System;
+
 using System.Collections.Generic;
 
 #nullable disable
@@ -18,3 +19,4 @@ namespace shop.Models
         public virtual ICollection<Book> Books { get; set; }
     }
 }
+

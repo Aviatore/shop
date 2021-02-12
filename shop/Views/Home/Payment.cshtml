@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Payment";
+}
+@model PaymentViewModel
+
+<div class="text-center">
+    <h1 class="display-4">Payment</h1>
+    @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
+</div>
+
+@Html.LabelFor(model => model.OrderId, htmlAttributes: new { @class = "control-label col-md-2" })
+@Html.LabelFor(model => model.TotalPrice, htmlAttributes: new { @class = "control-label col-md-2" })
+
+@using (Html.BeginForm("PaymentPost", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <h4>Card information</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.OrderId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CardName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CardName, new { htmlAttributes = new { @class = "form-control", placeholder = "Alex Smith" } })
+                @Html.ValidationMessageFor(model => model.CardName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CardNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CardNumber, new { htmlAttributes = new { @class = "form-control", placeholder = "1234 1234 1234 1234 1234" } })
+                @Html.ValidationMessageFor(model => model.CardNumber, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CardExp, htmlAttributes: new { @class = "control-label col-md-10" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CardExp, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CardExp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <h4>Billing Address</h4>
+        <hr />
+        <div class="form-group">
+            @Html.LabelFor(model => model.CardCVV, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CardCVV, new { htmlAttributes = new { @class = "form-control", placeholder = "123" } })
+                @Html.ValidationMessageFor(model => model.CardCVV, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Confirm payment and " class="btn btn-primary btn-block" />
+            </div>
+        </div>
+    </div>
+}
+
+
+@* <div> *@
+@*     @Html.ActionLink("Back to List", "Index") *@
+@* </div> *@

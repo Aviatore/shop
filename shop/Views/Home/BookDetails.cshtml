@@ -1,0 +1,36 @@
+@using System.Globalization
+@model Book?
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+<div class="container-fluid">
+    <div class="text-center">
+        <h3 class="display-6">@Model?.Title</h3>
+        @if (Model != null)
+        {
+            var culture = CultureInfo.CreateSpecificCulture("pl-PL");
+            <div class="row" style="width: 100%">
+                <div class="col-md-4">
+                    <img src="@Model.FigUrl" alt="@Model.Title" style="width: 250px">
+                </div>
+                <div class="col-md-8 text-left">
+                    <p><span class="font-weight-bold">Genre:</span> @Model.Genre.GenreName<br><span class="font-weight-bold">Publisher:</span> @Model.Publisher.PublisherName<br><span class="font-weight-bold">Price:</span> @Model.Price.ToString("0.00", culture) zł</p>
+                    <p class="text-justify"><span class="font-weight-bold">Description:</span> @Model.Description</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <p></p>
+                    <form asp-controller="Home" asp-action="BookDetails" asp-route-bookId="@Model.BookId">
+                        <label for="quantity">Quantity: </label>
+                        <input id="id" name="id" type="hidden" value="@Model.BookId">
+                        <input id="quantity" name="quantity" type="number" value="1" man="1" max="1000" step="1" style="width: 60px;"><br/>
+                        <input type="submit" value="Add to basket" class="btn btn-primary">
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

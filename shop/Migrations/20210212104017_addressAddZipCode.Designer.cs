@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210212104017_addressAddZipCode")]
+    partial class addressAddZipCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,12 +92,6 @@ namespace shop.Migrations
 
             modelBuilder.Entity("shop.Models.AuthorBook", b =>
                 {
-                    b.Property<int>("AuthorBookId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("author_book_id")
-                        .UseIdentityColumn();
-
                     b.Property<int>("AuthorId")
                         .HasColumnType("int")
                         .HasColumnName("author_id");
@@ -103,8 +99,6 @@ namespace shop.Migrations
                     b.Property<int>("BookId")
                         .HasColumnType("int")
                         .HasColumnName("book_id");
-
-                    b.HasKey("AuthorBookId");
 
                     b.HasIndex("AuthorId");
 
@@ -161,12 +155,6 @@ namespace shop.Migrations
 
             modelBuilder.Entity("shop.Models.BooksOrdered", b =>
                 {
-                    b.Property<int>("BooksOrderedId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("books_ordered_id")
-                        .UseIdentityColumn();
-
                     b.Property<int>("BookId")
                         .HasColumnType("int")
                         .HasColumnName("book_id");
@@ -174,8 +162,6 @@ namespace shop.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("order_id");
-
-                    b.HasKey("BooksOrderedId");
 
                     b.HasIndex("BookId");
 
