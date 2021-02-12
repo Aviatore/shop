@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using shop.Models;
 using shop.Utility;
@@ -115,37 +118,70 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            OrderViewModel order = new OrderViewModel();
-            order.OrderId = 1;
-            return View(order);
+            List<BookQuantity> booksInBasket = new List<BookQuantity>();
+            // foreach (var orderedBook in cookies) // orderedBook.BookId & orderedBook.Quantity
+            // {
+            //     int id = orderedBook.BookId;
+            //     int quantity = orderedBook.Quantity;
+            //     BookQuantity bookQuantity = new BookQuantity(_dbContext.Books.FirstOrDefault(b => b.BookId == id), quantity);
+            //     booksInBasket.Add(bookQuantity);
+            // }
+            ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel(booksInBasket);
+            return View(shoppingCartVM);
         }
         
         [HttpPost]
-        public IActionResult CheckOut(OrderViewModel order)
+        public IActionResult CheckOut(ShoppingCartViewModel scvm)
         {
-            var orderdd = order;
-            if (ModelState.IsValid) { //checking model state
-                    
+            if (ModelState.IsValid) {
                 //TODO: add full order to db 
-                
-                return RedirectToAction("Payment", orderdd);
+                // _dbContext.Orders.Add(order);
+
+                // TODO: how to get this order id to pass to Payment?
+                return RedirectToAction("Payment", new
+                {
+                    orderId = scvm.Order.OrderId, 
+                    totalPrice = scvm.TotalPrice()
+                });
             }
             return View("ShoppingCart");
         }
 
-        public IActionResult Payment(OrderViewModel order)
+        public IActionResult Payment(int orderId, double totalPrice)
         {
-            var orderss = order;
-            return View();
+            PaymentViewModel paymentVM = new PaymentViewModel(orderId, totalPrice);
+            return View(paymentVM);
         }
+        
+        
+        [HttpPost]
+        public IActionResult PaymentPost(PaymentViewModel pvm)
+        {
+            if (ModelState.IsValid) {
+                //TODO: update order.payment = true
+                // _dbContext.Orders.Add(order);
+
+                //TODO: redirect to confirmation site
+                return RedirectToAction("OrderConfirmation", true);
+            }
+            
+            // TODO: info, że failed, przekaż parametry do payment
+            return RedirectToAction("OrderConfirmation", false);
+        }
+
+        // public IActionResult OrderConfirmation(bool success)
+        // {
+        //     // TODO: error or order details => order in JSON, email
+        //     return View();
+        // }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
-
-
+        
         public IEnumerable<OrderedBook> AddBooksToSessionBasket(int id, int quantity)
         {
             List<OrderedBook> orderedBooks = new List<OrderedBook>();

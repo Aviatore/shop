@@ -7,43 +7,53 @@ namespace shop.Models
 {
     public class ShoppingCartViewModel
     {
-        public readonly List<OrderedBook> AnonymousBasket = new List<OrderedBook>();
+        public Order Order = new Order();
+        
+        public readonly List<BookQuantity> Basket = new List<BookQuantity>();
 
-        public void AddToCart(Book book)
+        public ShoppingCartViewModel(List<BookQuantity> listOfBooks)
         {
-            foreach (var orderBook in AnonymousBasket)
-            {
-                if (book.BookId == orderBook.BookId)
-                {
-                    orderBook.Quantity++;
-                }
-            }
-
-            OrderedBook newBook = new OrderedBook(book);
-            AnonymousBasket.Add(newBook);
+            Basket = listOfBooks;
         }
 
-        public void RemoveFromCart(Book book)
+        public void AddBook(int bookId)
         {
-            foreach (var orderBook in AnonymousBasket)
+            foreach (var bookQuantity in Basket)
             {
-                if (book.BookId == orderBook.BookId)
+                if (bookId == bookQuantity.Book.BookId)
                 {
-                    orderBook.Quantity--;
-                    if (orderBook.Quantity == 0)
+                    bookQuantity.Quantity++;
+                    return;
+                }
+            }
+            //
+            // BookQuantity newBook = new BookQuantity(bookId);
+            // Basket.Add(newBook);
+            // TODO: uaktualnij cookies; czy uaktualnij po wyjściu z shoppingCart?
+        }
+
+        public void RemoveBook(int bookId)
+        {
+            foreach (var bookQuantity in Basket)
+            {
+                if (bookId == bookQuantity.Book.BookId)
+                {
+                    bookQuantity.Quantity--;
+                    if (bookQuantity.Quantity == 0)
                     {
-                        AnonymousBasket.Remove(orderBook);
+                        Basket.Remove(bookQuantity);
                     }
                 }
             }
+            // TODO: uaktualnij cookies; czy uaktualnij po wyjściu z shoppingCart?
         }
 
         public double TotalPrice()
         {
             double totalPrice = 0; 
-            foreach (var orderBook in AnonymousBasket)
+            foreach (var bookQuantity in Basket)
             {
-                totalPrice += orderBook.Price;
+                totalPrice += bookQuantity.Book.Price * bookQuantity.Quantity;
             }
             
             return totalPrice;
@@ -52,9 +62,9 @@ namespace shop.Models
         public double TotalAmount()
         {
             int totalAmount = 0; 
-            foreach (var orderBook in AnonymousBasket)
+            foreach (var bookQuantity in Basket)
             {
-                totalAmount += orderBook.Quantity;
+                totalAmount += bookQuantity.Quantity;
             }
 
             return totalAmount;
