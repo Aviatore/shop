@@ -23,14 +23,10 @@ namespace shop.Models
         [Range(3,3)]
         public int CardCVV { get; set; }
         
+        [Required]
         public int OrderId { get; set; }
-        public double TotalPrice { get; set; }
-
-        public PaymentViewModel(int oderId, double totalPrice)
-        {
-            OrderId = oderId;
-            TotalPrice = totalPrice;
-        }
         
+        [Required]
+        public double TotalPrice { get; set; }
     }
 }

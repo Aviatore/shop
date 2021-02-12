@@ -8,7 +8,8 @@
     @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
 </div>
 
-// TODO: total price
+@Html.LabelFor(model => model.OrderId, htmlAttributes: new { @class = "control-label col-md-2" })
+@Html.LabelFor(model => model.TotalPrice, htmlAttributes: new { @class = "control-label col-md-2" })
 
 @using (Html.BeginForm("PaymentPost", "Home", FormMethod.Post))
 {

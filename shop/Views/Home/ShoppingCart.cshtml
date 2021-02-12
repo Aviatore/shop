@@ -24,21 +24,21 @@
                 Subtotal Price
             </th>
         </tr>
-        @foreach (var bookQuantity in Model.Basket)
+        @foreach (var book in Model.Basket)
         {
             <tr>
                 <td>
-                    @bookQuantity.Book.Title
+                    @book.Title
                 </td>
                 <td>
-                    @bookQuantity.Book.Price
+                    @book.Price
                 </td>
                 <td>
-                    @bookQuantity.Quantity
+                    @book.Quantity
                     @* TODO: add/ remove *@
                 </td>
                 <td>
-                    @(bookQuantity.Book.Price * bookQuantity.Quantity)
+                    @(book.Price * book.Quantity)
                 </td>
             </tr>
         }
@@ -60,7 +60,12 @@
         <h4>Customer data</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.Order.OrderId)
+        @* @Html.HiddenFor(model => model.Order.OrderId) *@
+        @for(int i = 0; i < Model.Basket.Count; i++)
+        {
+            @Html.HiddenFor(m => m.Basket[i].BookId)
+            @Html.HiddenFor(m => m.Basket[i].Quantity)
+        }
 
         <div class="form-group">
             @Html.LabelFor(model => model.Order.User.UserName, htmlAttributes: new { @class = "control-label col-md-2" })

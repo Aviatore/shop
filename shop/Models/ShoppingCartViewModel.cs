@@ -7,22 +7,17 @@ namespace shop.Models
 {
     public class ShoppingCartViewModel
     {
-        public Order Order = new Order();
+        public Order Order { get; set; }
         
-        public readonly List<BookQuantity> Basket = new List<BookQuantity>();
-
-        public ShoppingCartViewModel(List<BookQuantity> listOfBooks)
-        {
-            Basket = listOfBooks;
-        }
-
+        public List<OrderedBook> Basket { get; set; }
+        
         public void AddBook(int bookId)
         {
-            foreach (var bookQuantity in Basket)
+            foreach (var book in Basket)
             {
-                if (bookId == bookQuantity.Book.BookId)
+                if (bookId == book.BookId)
                 {
-                    bookQuantity.Quantity++;
+                    book.Quantity++;
                     return;
                 }
             }
@@ -34,14 +29,14 @@ namespace shop.Models
 
         public void RemoveBook(int bookId)
         {
-            foreach (var bookQuantity in Basket)
+            foreach (var book in Basket)
             {
-                if (bookId == bookQuantity.Book.BookId)
+                if (bookId == book.BookId)
                 {
-                    bookQuantity.Quantity--;
-                    if (bookQuantity.Quantity == 0)
+                    book.Quantity--;
+                    if (book.Quantity == 0)
                     {
-                        Basket.Remove(bookQuantity);
+                        Basket.Remove(book);
                     }
                 }
             }
@@ -51,9 +46,9 @@ namespace shop.Models
         public double TotalPrice()
         {
             double totalPrice = 0; 
-            foreach (var bookQuantity in Basket)
+            foreach (var book in Basket)
             {
-                totalPrice += bookQuantity.Book.Price * bookQuantity.Quantity;
+                totalPrice += book.Price * book.Quantity;
             }
             
             return totalPrice;

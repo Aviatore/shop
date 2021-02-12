@@ -118,29 +118,81 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<BookQuantity> booksInBasket = new List<BookQuantity>();
-            // foreach (var orderedBook in cookies) // orderedBook.BookId & orderedBook.Quantity
+            List<OrderedBook> orderedBooks = new List<OrderedBook>(); // cookies
+            List<OrderedBook> booksInBasket = new List<OrderedBook>(); //shopping cart
+            
+            if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
+                && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
+            {
+                orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
+            }
+            
+            // foreach (var orderedBook in orderedBooks)
             // {
             //     int id = orderedBook.BookId;
             //     int quantity = orderedBook.Quantity;
             //     BookQuantity bookQuantity = new BookQuantity(_dbContext.Books.FirstOrDefault(b => b.BookId == id), quantity);
             //     booksInBasket.Add(bookQuantity);
             // }
-            ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel(booksInBasket);
+            
+            foreach (var orderedBook in orderedBooks)
+            {
+                Book book = _dbContext.Books.FirstOrDefault(b => b.BookId == orderedBook.BookId);
+                orderedBook.Title = book.Title;
+                orderedBook.Price = book.Price;
+            }
+            
+            
+            ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel();
+            shoppingCartVM.Basket = orderedBooks;
             return View(shoppingCartVM);
         }
-        
+
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
         {
-            if (ModelState.IsValid) {
-                //TODO: add full order to db 
-                // _dbContext.Orders.Add(order);
+            if (ModelState.IsValid)
+            {
+                var billAdd = scvm.Order.BillingAddress;
+                _dbContext.Addresses.Add(billAdd);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(billAdd).GetDatabaseValues();
+                scvm.Order.BillingAddressId = billAdd.AddressId;
+                    
+                var shipAdd = scvm.Order.ShippingAddress;
+                _dbContext.Addresses.Add(shipAdd);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(shipAdd).GetDatabaseValues();
+                scvm.Order.ShippingAddressId = shipAdd.AddressId;
+                
+                var user = scvm.Order.User;
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(user).GetDatabaseValues();
+                scvm.Order.UserId = user.UserId;
+                
+                var order = scvm.Order;
+                _dbContext.Orders.Add(order);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(order).GetDatabaseValues();
+                int orderId = order.OrderId;
 
-                // TODO: how to get this order id to pass to Payment?
+                foreach (var orderedBook in scvm.Basket)
+                {
+                    var book = new BooksOrdered();
+                    book.BookId = orderedBook.BookId;
+                    book.OrderId = orderId;
+                    for (var i = 0; i < orderedBook.Quantity; i++)
+                    {
+                        _dbContext.BooksOrdereds.Add(book);
+                    }
+                    _dbContext.SaveChanges();
+                }
+                
+
+                // TODO: pass order id to Payment
                 return RedirectToAction("Payment", new
                 {
-                    orderId = scvm.Order.OrderId, 
                     totalPrice = scvm.TotalPrice()
                 });
             }
@@ -149,7 +201,9 @@ namespace shop.Controllers
 
         public IActionResult Payment(int orderId, double totalPrice)
         {
-            PaymentViewModel paymentVM = new PaymentViewModel(orderId, totalPrice);
+            PaymentViewModel paymentVM = new PaymentViewModel();
+            paymentVM.TotalPrice = totalPrice;
+            paymentVM.OrderId = orderId;
             return View(paymentVM);
         }
         
@@ -157,16 +211,17 @@ namespace shop.Controllers
         [HttpPost]
         public IActionResult PaymentPost(PaymentViewModel pvm)
         {
-            if (ModelState.IsValid) {
-                //TODO: update order.payment = true
-                // _dbContext.Orders.Add(order);
-
-                //TODO: redirect to confirmation site
-                return RedirectToAction("OrderConfirmation", true);
-            }
-            
-            // TODO: info, że failed, przekaż parametry do payment
-            return RedirectToAction("OrderConfirmation", false);
+            return null;
+            // if (ModelState.IsValid) {
+            //     //TODO: update order.payment = true
+            //     // _dbContext.Orders.Add(order);
+            //
+            //     //TODO: redirect to confirmation site
+            //     return RedirectToAction("OrderConfirmation", true);
+            // }
+            //
+            // // TODO: info, że failed, przekaż parametry do payment
+            // return RedirectToAction("OrderConfirmation", false);
         }
 
         // public IActionResult OrderConfirmation(bool success)
