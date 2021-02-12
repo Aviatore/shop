@@ -89,9 +89,9 @@ namespace shop.Models
 
             modelBuilder.Entity<AuthorBook>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("author_book");
+
+                entity.Property(e => e.AuthorBookId).HasColumnName("author_book_id");
 
                 entity.Property(e => e.AuthorId).HasColumnName("author_id");
 
@@ -147,9 +147,9 @@ namespace shop.Models
 
             modelBuilder.Entity<BooksOrdered>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("books_ordered");
+
+                entity.Property(e => e.BooksOrderedId).HasColumnName("books_ordered_id");
 
                 entity.Property(e => e.BookId).HasColumnName("book_id");
 
