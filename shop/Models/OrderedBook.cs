@@ -3,7 +3,7 @@ namespace shop.Models
     public class OrderedBook
     {
         public int BookId { get; set; }
-        public int Amount { get; set; }
+        public int Quantity { get; set; }
         public string Title { get; set; }
         
         public double Price { get; set; }
@@ -12,8 +12,18 @@ namespace shop.Models
         {
             BookId = book.BookId;
             Title = book.Title;
-            Amount = 1;
+            Quantity = 1;
             Price = book.Price;
+        }
+
+        public OrderedBook(int bookId, int quantity)
+        {
+            BookId = bookId;
+            Quantity = quantity;
+        }
+
+        public OrderedBook()
+        {
         }
     }
 }

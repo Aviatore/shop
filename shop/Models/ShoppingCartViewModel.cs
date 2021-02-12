@@ -15,7 +15,7 @@ namespace shop.Models
             {
                 if (book.BookId == orderBook.BookId)
                 {
-                    orderBook.Amount++;
+                    orderBook.Quantity++;
                 }
             }
 
@@ -29,8 +29,8 @@ namespace shop.Models
             {
                 if (book.BookId == orderBook.BookId)
                 {
-                    orderBook.Amount--;
-                    if (orderBook.Amount == 0)
+                    orderBook.Quantity--;
+                    if (orderBook.Quantity == 0)
                     {
                         AnonymousBasket.Remove(orderBook);
                     }
@@ -54,7 +54,7 @@ namespace shop.Models
             int totalAmount = 0; 
             foreach (var orderBook in AnonymousBasket)
             {
-                totalAmount += orderBook.Amount;
+                totalAmount += orderBook.Quantity;
             }
 
             return totalAmount;

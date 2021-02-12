@@ -56,6 +56,11 @@ namespace shop.Models
                     .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("country");
+                
+                entity.Property(e => e.ZipCode)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("zipcode");
 
                 entity.Property(e => e.Street)
                     .HasMaxLength(100)

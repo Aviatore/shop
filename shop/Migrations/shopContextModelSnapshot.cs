@@ -46,6 +46,12 @@ namespace shop.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("street");
 
+                    b.Property<string>("ZipCode")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("zipcode");
+
                     b.HasKey("AddressId");
 
                     b.ToTable("addresses");
