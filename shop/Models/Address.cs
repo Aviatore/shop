@@ -25,7 +25,6 @@ namespace shop.Models
         
         [Required]
         public string Country { get; set; }
-        
         [Display(Name = "Zip Code")]
         [RegularExpression(@"^\d{2,5}(?:[-\s]\d{3,4})?$")]
         [Required]

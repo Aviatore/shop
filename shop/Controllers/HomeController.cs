@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
-using shop.Data;
 using shop.Models;
+using shop.Utility;
 
 namespace shop.Controllers
 {
@@ -39,6 +38,37 @@ namespace shop.Controllers
             return View(bookGenrePublisher);
         }
         
+        [HttpPost, ActionName("Index")]
+        public IActionResult IndexPost(int id, int quantity)
+        {
+            var orderedBooks = AddBooksToSessionBasket(id, quantity);
+            HttpContext.Session.Set(WebConst.SessionCart, orderedBooks);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult BookDetails(int bookId)
+        {
+            var booksListById = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).FirstOrDefault(bId => bId.BookId == bookId);
+
+            return View(booksListById);
+        }
+        
+        [HttpPost, ActionName("BookDetails")]
+        public IActionResult BookDetailsPost(int id, int quantity)
+        {
+            var orderedBooks = AddBooksToSessionBasket(id, quantity);
+            HttpContext.Session.Set(WebConst.SessionCart, orderedBooks);
+
+            return RedirectToAction(nameof(BookDetails), new {bookId = id});
+        }
+        
+        [HttpPost]  
+        public IActionResult RedirectToBooksByGenre()  
+        {
+            return RedirectToAction("BooksByGenre", "Home", new {genreId = HttpContext.Request.Form["Genres"]});
+        }  
+        
         public IActionResult BooksByGenre(int genreId)
         {
             IEnumerable<Book> booksListByGenre = _dbContext.Books.Include(p => p.Publisher).Include(g => g.Genre).Where(gId => gId.GenreId == genreId);
@@ -46,6 +76,22 @@ namespace shop.Controllers
             
             return View(booksListByGenre);
         }
+        
+        [HttpPost, ActionName("BooksByGenre")]
+        public IActionResult BooksByGenrePost(int id, int quantity, int gId)
+        {
+            var orderedBooks = AddBooksToSessionBasket(id, quantity);
+            HttpContext.Session.Set(WebConst.SessionCart, orderedBooks);
+
+            return RedirectToAction(nameof(BooksByGenre), new {genreId = gId});
+        }
+        
+        
+        [HttpPost]  
+        public IActionResult RedirectToBooksByPublishers()  
+        {
+            return RedirectToAction("BooksByPublisher", "Home", new {publisherId = HttpContext.Request.Form["Publishers"]});
+        }  
 
         public IActionResult BooksByPublisher(int publisherId)
         {
@@ -53,6 +99,16 @@ namespace shop.Controllers
             ViewData["publisherName"] = _dbContext.Publishers.FirstOrDefault(p => p.PublisherId == publisherId)?.PublisherName;
             
             return View(booksListByPublisher);
+        }
+        
+        
+        [HttpPost, ActionName("BooksByPublisher")]
+        public IActionResult BooksByPublisherPost(int id, int quantity, int pId)
+        {
+            var orderedBooks = AddBooksToSessionBasket(id, quantity);
+            HttpContext.Session.Set(WebConst.SessionCart, orderedBooks);
+
+            return RedirectToAction(nameof(BooksByPublisher), new {publisherId = pId});
         }
 
         public IActionResult Privacy()
@@ -124,6 +180,48 @@ namespace shop.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+        }
+        
+        public IEnumerable<OrderedBook> AddBooksToSessionBasket(int id, int quantity)
+        {
+            List<OrderedBook> orderedBooks = new List<OrderedBook>();
+            if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
+                && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
+            {
+                orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
+            }
+
+            
+            if (orderedBooks.Count > 0)
+            {
+                bool isAdd = false;
+                foreach (var book in orderedBooks)
+                {
+                    if (book.BookId == id)
+                    {
+                        var sum = book.Quantity + quantity;
+                        book.Quantity = sum;
+                        isAdd = true;
+                        break;
+                    }
+                }
+
+                if (!isAdd)
+                {
+                    orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
+                }
+                else
+                {
+                    isAdd = false;
+                }
+                
+            }
+            else
+            {
+                orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
+            }
+
+            return orderedBooks;
         }
     }
 }
