@@ -202,29 +202,54 @@ namespace shop.Controllers
             paymentVM.OrderId = orderId;
             return View(paymentVM);
         }
-        
-        
+
+
         [HttpPost]
         public IActionResult PaymentPost(PaymentViewModel pvm)
         {
-            return null;
-            // if (ModelState.IsValid) {
-            //     //TODO: update order.payment = true
-            //     // _dbContext.Orders.Add(order);
-            //
-            //     //TODO: redirect to confirmation site
-            //     return RedirectToAction("OrderConfirmation", true);
-            // }
-            //
-            // // TODO: info, że failed, przekaż parametry do payment
-            // return RedirectToAction("OrderConfirmation", false);
-        }
+            if (!ModelState.IsValid)
+            {
+                return View("Payment", pvm);
+            }
 
-        // public IActionResult OrderConfirmation(bool success)
-        // {
-        //     // TODO: error or order details => order in JSON, email
-        //     return View();
-        // }
+            // TO TEST ONLY!
+            if (pvm.TotalPrice < 500)
+            {
+                pvm.SuccessfulPayment = true;
+            }
+
+            var order = _dbContext.Orders.SingleOrDefault(o => o.OrderId == pvm.OrderId);
+            if (order != null)
+            {
+                order.Payment = pvm.SuccessfulPayment;
+                _dbContext.SaveChanges();
+            }
+
+            return RedirectToAction("OrderConfirmation", new
+            {
+                success = pvm.SuccessfulPayment, 
+                price = pvm.TotalPrice, 
+                id = pvm.OrderId
+        });
+    }
+
+        public IActionResult OrderConfirmation(bool success, double price, int id)
+        {
+            if (success)
+            {
+                ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
+            }
+            else
+            {
+                ViewData["Message"] = "We couldn't charge your account...";
+            }
+            // JSON
+            
+            
+            
+            //email
+            return View();
+        }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
