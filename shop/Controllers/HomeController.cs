@@ -120,22 +120,14 @@ namespace shop.Controllers
         public IActionResult ShoppingCart()
         {
             List<OrderedBook> orderedBooks = new List<OrderedBook>(); // cookies
-            List<OrderedBook> booksInBasket = new List<OrderedBook>(); //shopping cart
+            // List<OrderedBook> booksInBasket = new List<OrderedBook>(); //shopping cart
             
             if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
             {
                 orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
             }
-            
-            // foreach (var orderedBook in orderedBooks)
-            // {
-            //     int id = orderedBook.BookId;
-            //     int quantity = orderedBook.Quantity;
-            //     BookQuantity bookQuantity = new BookQuantity(_dbContext.Books.FirstOrDefault(b => b.BookId == id), quantity);
-            //     booksInBasket.Add(bookQuantity);
-            // }
-            
+
             foreach (var orderedBook in orderedBooks)
             {
                 Book book = _dbContext.Books.FirstOrDefault(b => b.BookId == orderedBook.BookId);
@@ -152,54 +144,89 @@ namespace shop.Controllers
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
         {
-            if (ModelState.IsValid)
+            double totalPrice = scvm.TotalPrice();
+
+            if (!ModelState.IsValid)
             {
-                var billAdd = scvm.Order.BillingAddress;
-                _dbContext.Addresses.Add(billAdd);
-                _dbContext.SaveChanges();
-                _dbContext.Entry(billAdd).GetDatabaseValues();
-                scvm.Order.BillingAddressId = billAdd.AddressId;
-                    
-                var shipAdd = scvm.Order.ShippingAddress;
-                _dbContext.Addresses.Add(shipAdd);
-                _dbContext.SaveChanges();
-                _dbContext.Entry(shipAdd).GetDatabaseValues();
-                scvm.Order.ShippingAddressId = shipAdd.AddressId;
-                
-                var user = scvm.Order.User;
+                return View("ShoppingCart", scvm);
+            }
+            
+            Address billAdd = scvm.Order.BillingAddress;
+            scvm.Order.BillingAddressId = AddToAddressDBOrGetID(billAdd);
+
+            if (scvm.ShippingEqualBilling || scvm.Order.BillingAddress == scvm.Order.ShippingAddress)
+            {
+                scvm.Order.ShippingAddressId = scvm.Order.BillingAddressId;
+            }
+            else
+            {
+                Address shipAdd = scvm.Order.ShippingAddress;
+                scvm.Order.ShippingAddressId = AddToAddressDBOrGetID(shipAdd);   
+            }
+
+            User user = scvm.Order.User;
+            int? userId = _dbContext.Users
+                .Where(u => u.UserName.Equals(user.UserName) && u.Email.Equals(user.Email) && u.Phone.Equals(user.Phone))
+                .Select(u => (int?)u.UserId)
+                .FirstOrDefault();
+
+            if (userId.HasValue)
+                scvm.Order.UserId = userId.Value;
+            else
+            {
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
                 _dbContext.Entry(user).GetDatabaseValues();
                 scvm.Order.UserId = user.UserId;
-                
-                var order = scvm.Order;
-                _dbContext.Orders.Add(order);
-                _dbContext.SaveChanges();
-                _dbContext.Entry(order).GetDatabaseValues();
-                int orderId = order.OrderId;
-
-                foreach (var orderedBook in scvm.Basket)
-                {
-                    var book = new BooksOrdered();
-                    book.BookId = orderedBook.BookId;
-                    book.OrderId = orderId;
-                    for (var i = 0; i < orderedBook.Quantity; i++)
-                    {
-                        _dbContext.BooksOrdereds.Add(book);
-                    }
-                    _dbContext.SaveChanges();
-                }
-                
-
-                // TODO: pass order id to Payment
-                return RedirectToAction("Payment", new
-                {
-                    totalPrice = scvm.TotalPrice()
-                });
             }
-            return View("ShoppingCart");
+
+            var order = scvm.Order;
+            scvm.Order.User = null;
+            scvm.Order.BillingAddress = null;
+            scvm.Order.ShippingAddress = null;
+            _dbContext.Orders.Add(order);
+            _dbContext.SaveChanges();
+            _dbContext.Entry(order).GetDatabaseValues();
+            int orrderId = order.OrderId;
+
+            foreach (var item in scvm.Basket)
+            {
+                var book = new BooksOrdered();
+                book.BookId = item.BookId;
+                book.OrderId = orrderId;
+                for (var i = 0; i < item.Quantity; i++)
+                {
+                    _dbContext.BooksOrdereds.Add(book);
+                }
+                _dbContext.SaveChanges();
+            }
+            
+
+            return RedirectToAction("Payment", new
+            {
+                orderId = orrderId,
+                totalPrice = scvm.TotalPrice()
+            });
         }
 
+        private int AddToAddressDBOrGetID(Address data)
+        {
+            int? addressId = _dbContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                _dbContext.Addresses.Add(data);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
+        
         public IActionResult Payment(int orderId, double totalPrice)
         {
             PaymentViewModel paymentVM = new PaymentViewModel();
@@ -207,29 +234,55 @@ namespace shop.Controllers
             paymentVM.OrderId = orderId;
             return View(paymentVM);
         }
-        
-        
+
+
         [HttpPost]
         public IActionResult PaymentPost(PaymentViewModel pvm)
         {
-            return null;
-            // if (ModelState.IsValid) {
-            //     //TODO: update order.payment = true
-            //     // _dbContext.Orders.Add(order);
-            //
-            //     //TODO: redirect to confirmation site
-            //     return RedirectToAction("OrderConfirmation", true);
-            // }
-            //
-            // // TODO: info, że failed, przekaż parametry do payment
-            // return RedirectToAction("OrderConfirmation", false);
-        }
+            if (!ModelState.IsValid)
+            {
+                return View("Payment", pvm);
+            }
 
-        // public IActionResult OrderConfirmation(bool success)
-        // {
-        //     // TODO: error or order details => order in JSON, email
-        //     return View();
-        // }
+            // TO TEST ONLY!
+            if (pvm.TotalPrice < 500)
+            {
+                pvm.SuccessfulPayment = true;
+            }
+
+            var order = _dbContext.Orders.SingleOrDefault(o => o.OrderId == pvm.OrderId);
+            if (order != null)
+            {
+                order.Payment = pvm.SuccessfulPayment;
+                _dbContext.SaveChanges();
+            }
+
+            return RedirectToAction("OrderConfirmation", new
+            {
+                success = pvm.SuccessfulPayment, 
+                price = pvm.TotalPrice, 
+                id = pvm.OrderId
+        });
+    }
+
+        public IActionResult OrderConfirmation(bool success, double price, int id)
+        {
+            if (success)
+            {
+                ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
+                // TODO: wyczyść cookies!
+            }
+            else
+            {
+                ViewData["Message"] = "We couldn't charge your account...";
+            }
+            // JSON
+
+            //email
+            
+            
+            return View("OrderConfirmation", id);
+        }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

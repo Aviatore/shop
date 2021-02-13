@@ -8,11 +8,11 @@ namespace shop.Models
         public double Price { get; set; }
 
 
-        public OrderedBook(Book book)
+        public OrderedBook(Book book, int quantity)
         {
             BookId = book.BookId;
             Title = book.Title;
-            Quantity = 1;
+            Quantity = quantity;
             Price = book.Price;
         }
 
