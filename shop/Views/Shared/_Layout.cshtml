@@ -31,7 +31,7 @@
                 </ul>
                 @if (HttpContextAccessor.HttpContext?.Session.Get<List<OrderedBook>>(WebConst.SessionCart) != null)
                 {
-                    <a asp-action="" asp-controller="" methods="post" class="text-secondary text-decoration-none">
+                    <a asp-action="ShoppingCart" asp-controller="Home" class="text-secondary text-decoration-none">
                         @{
                             var listOrderedBook = HttpContextAccessor.HttpContext?.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
                             int quantity = 0;
