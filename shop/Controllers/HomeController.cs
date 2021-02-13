@@ -24,8 +24,7 @@ namespace shop.Controllers
             _logger = logger;
             _dbContext = dbContext;
         }
-
-        [Authorize]
+        
         public IActionResult Index()
         {
             BookGenrePublisher bookGenrePublisher = new BookGenrePublisher();
