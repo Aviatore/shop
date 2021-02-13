@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -23,7 +24,7 @@ namespace shop.Controllers
             _logger = logger;
             _dbContext = dbContext;
         }
-
+        
         public IActionResult Index()
         {
             BookGenrePublisher bookGenrePublisher = new BookGenrePublisher();
