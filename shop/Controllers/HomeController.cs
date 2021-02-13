@@ -180,6 +180,9 @@ namespace shop.Controllers
             }
 
             var order = scvm.Order;
+            scvm.Order.User = null;
+            scvm.Order.BillingAddress = null;
+            scvm.Order.ShippingAddress = null;
             _dbContext.Orders.Add(order);
             _dbContext.SaveChanges();
             _dbContext.Entry(order).GetDatabaseValues();
@@ -266,17 +269,18 @@ namespace shop.Controllers
             if (success)
             {
                 ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
+                // TODO: wyczyść cookies!
             }
             else
             {
                 ViewData["Message"] = "We couldn't charge your account...";
             }
             // JSON
-            
-            
-            
+
             //email
-            return View();
+            
+            
+            return View("OrderConfirmation", id);
         }
 
 

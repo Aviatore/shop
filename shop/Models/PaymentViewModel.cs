@@ -12,7 +12,8 @@ namespace shop.Models
         public string CardName { get; set; }
 
         [Display(Name = "Card number")]
-        [CreditCard]
+        // TO TEST: 
+        // [CreditCard]
         [Required]
         public string CardNumber { get; set; }
 
