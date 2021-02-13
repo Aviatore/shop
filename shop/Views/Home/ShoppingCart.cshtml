@@ -65,6 +65,8 @@
         {
             @Html.HiddenFor(m => m.Basket[i].BookId)
             @Html.HiddenFor(m => m.Basket[i].Quantity)
+            @Html.HiddenFor(m => m.Basket[i].Title)
+            @Html.HiddenFor(m => m.Basket[i].Price)
         }
 
         <div class="form-group">
@@ -127,7 +129,9 @@
 
         <div class="form-group">
             <div class="col-md-10">
-                <input type="checkbox" id = "shipping-checkbox" class = "form-control">Check this box if Billing Address and Shipping Address are the same.
+                @Html.CheckBoxFor(model => model.ShippingEqualBilling, new { id="shipping-checkbox", @class="form-control"})
+                @Html.LabelFor(model => model.ShippingEqualBilling, htmlAttributes: new { @class = "control-label col-md-8" })
+                @* <input type="checkbox" id="shipping-checkbox" class="form-control">Check this box if Billing Address and Shipping Address are the same. *@
             </div>
         </div>
         
