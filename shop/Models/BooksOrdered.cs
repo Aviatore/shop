@@ -7,6 +7,7 @@ namespace shop.Models
 {
     public partial class BooksOrdered
     {
+        public int BooksOrderedId { get; set; }
         public int OrderId { get; set; }
         public int BookId { get; set; }
 

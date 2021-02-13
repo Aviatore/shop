@@ -33,7 +33,7 @@ namespace shop.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=shop;User Id=SA;Password=YourNewStrong@Passw0rd;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=shop;User Id=SA;Password=Gtm#Dpi7zwt;");
             }
         }
 
@@ -89,9 +89,9 @@ namespace shop.Models
 
             modelBuilder.Entity<AuthorBook>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("author_book");
+
+                entity.Property(e => e.AuthorBookId).HasColumnName("author_book_id");
 
                 entity.Property(e => e.AuthorId).HasColumnName("author_id");
 
@@ -147,9 +147,9 @@ namespace shop.Models
 
             modelBuilder.Entity<BooksOrdered>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("books_ordered");
+
+                entity.Property(e => e.BooksOrderedId).HasColumnName("books_ordered_id");
 
                 entity.Property(e => e.BookId).HasColumnName("book_id");
 
