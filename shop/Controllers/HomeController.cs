@@ -150,25 +150,35 @@ namespace shop.Controllers
                 return View("ShoppingCart", scvm);
             }
             
-            var billAdd = scvm.Order.BillingAddress;
-            _dbContext.Addresses.Add(billAdd);
-            _dbContext.SaveChanges();
-            _dbContext.Entry(billAdd).GetDatabaseValues();
-            scvm.Order.BillingAddressId = billAdd.AddressId;
-                
-            //TODO: if shipp == bill nie wykonuj tego kodu! 
-            var shipAdd = scvm.Order.ShippingAddress;
-            _dbContext.Addresses.Add(shipAdd);
-            _dbContext.SaveChanges();
-            _dbContext.Entry(shipAdd).GetDatabaseValues();
-            scvm.Order.ShippingAddressId = shipAdd.AddressId;
-            
-            var user = scvm.Order.User;
-            _dbContext.Users.Add(user);
-            _dbContext.SaveChanges();
-            _dbContext.Entry(user).GetDatabaseValues();
-            scvm.Order.UserId = user.UserId;
-            
+            Address billAdd = scvm.Order.BillingAddress;
+            scvm.Order.BillingAddressId = AddToAddressDBOrGetID(billAdd);
+
+            if (scvm.ShippingEqualBilling || scvm.Order.BillingAddress == scvm.Order.ShippingAddress)
+            {
+                scvm.Order.ShippingAddressId = scvm.Order.BillingAddressId;
+            }
+            else
+            {
+                Address shipAdd = scvm.Order.ShippingAddress;
+                scvm.Order.ShippingAddressId = AddToAddressDBOrGetID(shipAdd);   
+            }
+
+            User user = scvm.Order.User;
+            int? userId = _dbContext.Users
+                .Where(u => u.UserName.Equals(user.UserName) && u.Email.Equals(user.Email) && u.Phone.Equals(user.Phone))
+                .Select(u => (int?)u.UserId)
+                .FirstOrDefault();
+
+            if (userId.HasValue)
+                scvm.Order.UserId = userId.Value;
+            else
+            {
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(user).GetDatabaseValues();
+                scvm.Order.UserId = user.UserId;
+            }
+
             var order = scvm.Order;
             _dbContext.Orders.Add(order);
             _dbContext.SaveChanges();
@@ -195,6 +205,24 @@ namespace shop.Controllers
             });
         }
 
+        private int AddToAddressDBOrGetID(Address data)
+        {
+            int? addressId = _dbContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                _dbContext.Addresses.Add(data);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
+        
         public IActionResult Payment(int orderId, double totalPrice)
         {
             PaymentViewModel paymentVM = new PaymentViewModel();
