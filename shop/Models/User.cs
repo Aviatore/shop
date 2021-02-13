@@ -15,7 +15,7 @@ namespace shop.Models
 
         public int UserId { get; set; }
         
-        [Display(Name = "Name")]
+        [Display(Name = "Full Name")]
         [Required]
         public string UserName { get; set; }
         
