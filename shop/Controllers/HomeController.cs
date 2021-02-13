@@ -270,13 +270,12 @@ namespace shop.Controllers
             if (success)
             {
                 ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
-                // TODO: wyczyść cookies!
+                HttpContext.Session.Clear();
             }
             else
             {
                 ViewData["Message"] = "We couldn't charge your account...";
             }
-            // JSON
 
             //email
             
