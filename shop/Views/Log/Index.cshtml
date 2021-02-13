@@ -1,0 +1,40 @@
+@model LogDataContainer;
+
+@{
+    ViewBag.Title = "Logs";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-6">@ViewBag.Title</h1>
+    
+    @using (Html.BeginForm("Search", "Log", FormMethod.Post))
+    {
+        <input type="number" id="OrderId" name="OrderId" value="" placeholder="Order Id" />
+        <input type="date" id="TimestampFrom" name="TimestampFrom" value="@Model.DateTimeFrom" />
+        <input type="date" id="TimestampTo" name="TimestampTo" value="@Model.DateTimeTo" />
+        <input type="submit" value="Search">
+    }
+    
+    <table class="table table-bordered table-striped" style="width: 100%">
+        <thead>
+        <tr>
+            <th>Log Id</th>
+            <th>Order Id</th>
+            <th>Order Date</th>
+            <th>Message</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model.Logs)
+            {
+                <tr>
+                    <td>@log.LogId.ToString()</td>
+                    <td>@log.OrderId.ToString()</td>
+                    <td>@log.Timestamp.ToString("d")</td>
+                    <td>@log.Msg</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
