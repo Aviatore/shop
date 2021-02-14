@@ -4,12 +4,14 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using shop.Models;
+using shop.Utilities;
 using shop.Utility;
 
 namespace shop.Controllers
@@ -18,11 +20,13 @@ namespace shop.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly shopContext _dbContext;
+        private readonly IEmailSender _emailSender;
 
-        public HomeController(ILogger<HomeController> logger, shopContext dbContext)
+        public HomeController(ILogger<HomeController> logger, shopContext dbContext, IEmailSender emailSender)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _emailSender = emailSender;
         }
         
         public IActionResult Index()

@@ -1,0 +1,13 @@
+# Tworzenie klas modeli bazy danych oraz dbContext'u w oparciu o tabele już  istniejącej konkretnej bazy danych.
+```dotnet ef dbcontext scaffold "<connectionString>" Microsoft.EntityFrameworkCore.SqlServer -o Models```
+
+# Dodawanie migawki bazy danych (czynność wykonuje się po modyfikacji plików modeli lub pliku shopContext)
+```dotnet ef migrations add <snapshotName> --context shopContext```
+
+# Lista migawek bazy danych
+```dotnet ef migrations list --context shopContext```
+
+# Aktualizacja strukty bazy danych w oparciu o listę migawek (podczas aktualizacji dodawane są ostatnio dodane migawki)
+# Jeżeli w connectionString podamy nazwę nowej bazy danych, to podczas update zostanie ta baza utworzona i w oparciu o wszystki migawki
+# zostanie odtworzona struktura bazy danych.
+```dotnet ef database update --context shopContext```
