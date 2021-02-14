@@ -17,37 +17,28 @@ namespace shop.Models
         [Required]
         public bool ShippingEqualBilling { get; set; }
         
-        public void AddBook(int bookId)
-        {
-            foreach (var book in Basket)
-            {
-                if (bookId == book.BookId)
-                {
-                    book.Quantity++;
-                    return;
-                }
-            }
-            //
-            // BookQuantity newBook = new BookQuantity(bookId);
-            // Basket.Add(newBook);
-            // TODO: uaktualnij cookies; czy uaktualnij po wyjściu z shoppingCart?
-        }
-
-        public void RemoveBook(int bookId)
-        {
-            foreach (var book in Basket)
-            {
-                if (bookId == book.BookId)
-                {
-                    book.Quantity--;
-                    if (book.Quantity == 0)
-                    {
-                        Basket.Remove(book);
-                    }
-                }
-            }
-            // TODO: uaktualnij cookies; czy uaktualnij po wyjściu z shoppingCart?
-        }
+        // public void UpdateBook(int bookId, int value)
+        // {
+        //     foreach (var book in Basket)
+        //     {
+        //         if (bookId == book.BookId)
+        //         {
+        //             book.Quantity += value;
+        //             return;
+        //         }
+        //     }
+        // }
+        //
+        // public void RemoveBook(int bookId)
+        // {
+        //     foreach (var book in Basket)
+        //     {
+        //         if (bookId == book.BookId)
+        //         {
+        //             Basket.Remove(book);
+        //         }
+        //     }
+        // }
 
         public double TotalPrice()
         {
