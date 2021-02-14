@@ -13,3 +13,7 @@
 {
     <a asp-action="Payment" asp-controller="Home" asp-route-orderId="@Model.Item1" asp-route-totalPrice="@Model.Item2" class="text-secondary text-decoration-none">Try again</a>
 }
+else
+{
+    <a asp-action="Index" asp-controller="Home" class="text-secondary text-decoration-none">Go back to main page</a>
+}
