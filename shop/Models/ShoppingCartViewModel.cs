@@ -7,9 +7,15 @@ namespace shop.Models
 {
     public class ShoppingCartViewModel
     {
+        [Required]
         public Order Order { get; set; }
         
+        [Required]
         public List<OrderedBook> Basket { get; set; }
+        
+        [Display(Name = "Check this box if Billing Address and Shipping Address are the same.")]
+        [Required]
+        public bool ShippingEqualBilling { get; set; }
         
         public void AddBook(int bookId)
         {
@@ -46,9 +52,9 @@ namespace shop.Models
         public double TotalPrice()
         {
             double totalPrice = 0; 
-            foreach (var book in Basket)
+            foreach (var orderedBook in Basket)
             {
-                totalPrice += book.Price * book.Quantity;
+                totalPrice += orderedBook.Price * orderedBook.Quantity;
             }
             
             return totalPrice;
