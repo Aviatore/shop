@@ -278,9 +278,8 @@ namespace shop.Controllers
             }
 
             //email
-            
-            
-            return View("OrderConfirmation", id);
+
+            return View("OrderConfirmation", (id, price, success));
         }
 
 

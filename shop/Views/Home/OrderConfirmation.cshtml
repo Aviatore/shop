@@ -1,6 +1,15 @@
 ﻿@{
     ViewData["Title"] = "Order Confirmation";
 }
+
+@model (int, double, bool)
+
+
 <h1>@ViewData["Title"]</h1>
 
 <p>@ViewData["Message"]</p>
+
+@if (!Model.Item3)
+{
+    <a asp-action="Payment" asp-controller="Home" asp-route-orderId="@Model.Item1" asp-route-totalPrice="@Model.Item2" class="text-secondary text-decoration-none">Try again</a>
+}
