@@ -17,35 +17,47 @@
             <th scope="col">
                 Unit Price
             </th>
-            <th scope="col">
+            <th scope="col" colspan="3">
                 Quantity
             </th>
-            <th scope="col">
+            <th scope="col" colspan="2">
                 Subtotal Price
             </th>
         </tr>
-        @foreach (var book in Model.Basket)
+        
+        @if (Model.Basket != null)
         {
+            foreach (var book in Model.Basket)
+            {
+                <tr>
+                    <td>
+                        @book.Title
+                    </td>
+                    <td>
+                        @book.Price
+                    </td>
+                    <td>
+                        <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="-1" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">-</a>
+                    </td>
+                    <td>
+                        @book.Quantity
+                    </td>
+                    <td>
+                        <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="1" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">+</a>
+                    </td>
+                    <td>
+                        @(book.Price * book.Quantity)
+                    </td>
+                    <td>
+                        <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="-@book.Quantity" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">Delete</a>
+                    </td>
+                </tr>
+            }
             <tr>
-                <td>
-                    @book.Title
-                </td>
-                <td>
-                    @book.Price
-                </td>
-                <td>
-                    @book.Quantity
-                    @* TODO: add/ remove *@
-                </td>
-                <td>
-                    @(book.Price * book.Quantity)
-                </td>
+                <td colspan="5" class="text-right font-weight-bold">Total Price</td>
+                <td colspan="2">@Model.TotalPrice()</td>
             </tr>
         }
-        <tr>
-          <td colspan="3" class="text-right font-weight-bold">Total Price</td>
-          <td>@Model.TotalPrice()</td>
-        </tr>
     </table>
 </div>
 
@@ -61,12 +73,15 @@
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @* @Html.HiddenFor(model => model.Order.OrderId) *@
-        @for(int i = 0; i < Model.Basket.Count; i++)
+        @if (Model.Basket != null)
         {
-            @Html.HiddenFor(m => m.Basket[i].BookId)
-            @Html.HiddenFor(m => m.Basket[i].Quantity)
-            @Html.HiddenFor(m => m.Basket[i].Title)
-            @Html.HiddenFor(m => m.Basket[i].Price)
+            for(int i = 0; i < Model.Basket.Count; i++)
+            {
+                @Html.HiddenFor(m => m.Basket[i].BookId)
+                @Html.HiddenFor(m => m.Basket[i].Quantity)
+                @Html.HiddenFor(m => m.Basket[i].Title)
+                @Html.HiddenFor(m => m.Basket[i].Price)
+            }   
         }
 
         <div class="form-group">

@@ -119,27 +119,32 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<OrderedBook> orderedBooks = new List<OrderedBook>(); // cookies
-            // List<OrderedBook> booksInBasket = new List<OrderedBook>(); //shopping cart
-            
-            if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
-                && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
+            List<OrderedBook>? orderedBooks = GetListFromCookies();
+
+            if (orderedBooks != null)
             {
-                orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
+                foreach (var orderedBook in orderedBooks)
+                {
+                    Book book = _dbContext.Books.FirstOrDefault(b => b.BookId == orderedBook.BookId);
+                    orderedBook.Title = book.Title;
+                    orderedBook.Price = book.Price;
+                }   
+                
+                ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel();
+                shoppingCartVM.Basket = orderedBooks;
+                return View(shoppingCartVM);
             }
 
-            foreach (var orderedBook in orderedBooks)
-            {
-                Book book = _dbContext.Books.FirstOrDefault(b => b.BookId == orderedBook.BookId);
-                orderedBook.Title = book.Title;
-                orderedBook.Price = book.Price;
-            }
-            
-            
-            ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel();
-            shoppingCartVM.Basket = orderedBooks;
-            return View(shoppingCartVM);
+            return RedirectToAction("Index");
         }
+
+        public IActionResult ShoppingCartUpdate(int bookId, int value)
+        {
+            var orderedBooks = AddBooksToSessionBasket(bookId, value);
+            HttpContext.Session.Set(WebConst.SessionCart, orderedBooks);
+            return RedirectToAction("ShoppingCart");
+        }
+
 
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
@@ -288,6 +293,17 @@ namespace shop.Controllers
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
+
+        private List<OrderedBook>? GetListFromCookies()
+        {
+            if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
+                && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
+            {
+                return HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
+            }
+
+            return null;
+        }
         
         public IEnumerable<OrderedBook> AddBooksToSessionBasket(int id, int quantity)
         {
@@ -309,6 +325,11 @@ namespace shop.Controllers
                         var sum = book.Quantity + quantity;
                         book.Quantity = sum;
                         isAdd = true;
+
+                        if (book.Quantity == 0)
+                        {
+                            orderedBooks.Remove(book);
+                        }
                         break;
                     }
                 }
@@ -321,7 +342,7 @@ namespace shop.Controllers
                 {
                     isAdd = false;
                 }
-                
+
             }
             else
             {
