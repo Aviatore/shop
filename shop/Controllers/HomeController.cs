@@ -280,6 +280,10 @@ namespace shop.Controllers
             {
                 ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
                 HttpContext.Session.Clear();
+                
+                var order = _dbContext.Orders.Include(u => u.User).SingleOrDefault(o => o.OrderId == id);
+                _emailSender.SendEmailAsync(order.User.Email, $"Order {order.OrderId.ToString()} confirmation",
+                    "Your order accepted.");
             }
             else
             {
