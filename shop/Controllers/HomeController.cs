@@ -332,7 +332,7 @@ namespace shop.Controllers
                         book.Quantity = sum;
                         isAdd = true;
 
-                        if (book.Quantity == 0)
+                        if (book.Quantity <= 0)
                         {
                             orderedBooks.Remove(book);
                         }
