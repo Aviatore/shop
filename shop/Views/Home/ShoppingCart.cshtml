@@ -48,7 +48,7 @@
                         <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="1" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">+</a>
                     </td>
                     <td>
-                        @((book.Price * book.Quantity).ToString("0.00", culture))
+                        @((book.Price * book.Quantity).ToString("0.00", culture)) zł
                     </td>
                     <td>
                         <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="-@book.Quantity" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">Delete</a>
