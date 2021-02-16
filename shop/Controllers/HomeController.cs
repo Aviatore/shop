@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -278,7 +279,8 @@ namespace shop.Controllers
         {
             if (success)
             {
-                ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
+                var culture = CultureInfo.CreateSpecificCulture("pl-PL");
+                ViewData["Message"] = $"Thank You for your order! {price.ToString("0.00", culture)} zł was successfully charged from your bank account.";
                 HttpContext.Session.Clear();
             }
             else
