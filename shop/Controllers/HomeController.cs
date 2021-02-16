@@ -284,8 +284,11 @@ namespace shop.Controllers
                 HttpContext.Session.Clear();
                 
                 var order = _dbContext.Orders.Include(u => u.User).SingleOrDefault(o => o.OrderId == id);
-                _emailSender.SendEmailAsync(order.User.Email, $"Order {order.OrderId.ToString()} confirmation",
-                    "Your order accepted.");
+                if (order != null)
+                {
+                    _emailSender.SendEmailAsync(order.User.Email, $"Order {order.OrderId.ToString()} confirmation",
+                        "Your order accepted.");
+                }
             }
             else
             {
