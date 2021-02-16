@@ -20,10 +20,10 @@
         <hr />
         @Html.LabelFor(model => model.OrderId, htmlAttributes: new {@class = "control-label col-md-5"})
         @Html.HiddenFor(m => m.OrderId)
-        <p>&nbsp;&nbsp;&nbsp;@Model.OrderId</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.OrderId</p>
         @Html.LabelFor(model => model.TotalPrice, htmlAttributes: new {@class = "control-label col-md-2"})
         @Html.HiddenFor(m => m.TotalPrice)
-        <p>&nbsp;&nbsp;&nbsp;@Model.TotalPrice.ToString("0.00", culture) zł</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.TotalPrice.ToString("0.00", culture) zł</p>
 
         <h4>Card information</h4>
         <hr/>
