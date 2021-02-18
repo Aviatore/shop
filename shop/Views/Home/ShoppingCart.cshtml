@@ -2,6 +2,7 @@
     ViewData["Title"] = "Your Shopping Cart";
 }
 
+@using System.Globalization
 @model ShoppingCartViewModel
 
 <div class="text-center">
@@ -27,6 +28,7 @@
         
         @if (Model.Basket != null)
         {
+            var culture = CultureInfo.CreateSpecificCulture("pl-PL");
             foreach (var book in Model.Basket)
             {
                 <tr>
@@ -34,7 +36,7 @@
                         @book.Title
                     </td>
                     <td>
-                        @book.Price
+                        @book.Price.ToString("0.00", culture) zł
                     </td>
                     <td>
                         <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="-1" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">-</a>
@@ -46,7 +48,7 @@
                         <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="1" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">+</a>
                     </td>
                     <td>
-                        @(book.Price * book.Quantity)
+                        @((book.Price * book.Quantity).ToString("0.00", culture)) zł
                     </td>
                     <td>
                         <a asp-controller="Home" asp-action="ShoppingCartUpdate" asp-route-value="-@book.Quantity" asp-route-bookId="@book.BookId" class="btn btn-primary btn-block">Delete</a>
@@ -55,7 +57,7 @@
             }
             <tr>
                 <td colspan="5" class="text-right font-weight-bold">Total Price</td>
-                <td colspan="2">@Model.TotalPrice()</td>
+                <td colspan="2">@Model.TotalPrice().ToString("0.00", culture) zł</td>
             </tr>
         }
     </table>

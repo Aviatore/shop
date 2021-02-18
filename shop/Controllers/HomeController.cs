@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using shop.Models;
+using shop.Utilities;
 using shop.Utility;
 
 namespace shop.Controllers
@@ -18,11 +21,15 @@ namespace shop.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly shopContext _dbContext;
+        private readonly IEmailSender _emailSender;
+        private readonly IMyLogger _myLogger;
 
-        public HomeController(ILogger<HomeController> logger, shopContext dbContext)
+        public HomeController(ILogger<HomeController> logger, shopContext dbContext, IEmailSender emailSender, IMyLogger myLogger)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _emailSender = emailSender;
+            _myLogger = myLogger;
         }
         
         public IActionResult Index()
@@ -132,6 +139,7 @@ namespace shop.Controllers
                 
                 ShoppingCartViewModel shoppingCartVM = new ShoppingCartViewModel();
                 shoppingCartVM.Basket = orderedBooks;
+                
                 return View(shoppingCartVM);
             }
 
@@ -193,6 +201,8 @@ namespace shop.Controllers
             _dbContext.SaveChanges();
             _dbContext.Entry(order).GetDatabaseValues();
             int orrderId = order.OrderId;
+            
+            _myLogger.Add(orrderId, "Order data accepted");
 
             foreach (var item in scvm.Basket)
             {
@@ -234,6 +244,7 @@ namespace shop.Controllers
         
         public IActionResult Payment(int orderId, double totalPrice)
         {
+            _myLogger.Add(orderId, "Start payment");
             PaymentViewModel paymentVM = new PaymentViewModel();
             paymentVM.TotalPrice = totalPrice;
             paymentVM.OrderId = orderId;
@@ -262,6 +273,8 @@ namespace shop.Controllers
                 _dbContext.SaveChanges();
             }
 
+            _myLogger.Add(pvm.OrderId, "Payment accepted");
+                
             return RedirectToAction("OrderConfirmation", new
             {
                 success = pvm.SuccessfulPayment, 
@@ -274,8 +287,17 @@ namespace shop.Controllers
         {
             if (success)
             {
-                ViewData["Message"] = $"Thank You for your order! {price} was successfully charged from your bank account.";
+                var culture = CultureInfo.CreateSpecificCulture("pl-PL");
+                ViewData["Message"] = $"Thank You for your order! {price.ToString("0.00", culture)} zł was successfully charged from your bank account.";
                 HttpContext.Session.Clear();
+                
+                var order = _dbContext.Orders.Include(u => u.User).SingleOrDefault(o => o.OrderId == id);
+                if (order != null)
+                {
+                    _emailSender.SendEmailAsync(order.User.Email, $"Order {order.OrderId.ToString()} confirmation",
+                        "Your order accepted.");
+                    _myLogger.Add(id, "Sent order confirmation");
+                }
             }
             else
             {
@@ -326,7 +348,7 @@ namespace shop.Controllers
                         book.Quantity = sum;
                         isAdd = true;
 
-                        if (book.Quantity == 0)
+                        if (book.Quantity <= 0)
                         {
                             orderedBooks.Remove(book);
                         }
