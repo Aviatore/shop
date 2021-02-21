@@ -3,7 +3,7 @@ using shop.Models;
 
 namespace shop.Utilities
 {
-    public class Logger
+    public class Logger : IMyLogger
     {
         private readonly shopContext _ctx;
         
@@ -20,6 +20,7 @@ namespace shop.Utilities
                 Msg = msg,
                 Timestamp = DateTime.Now
             });
+            _ctx.SaveChanges();
         }
     }
 }
