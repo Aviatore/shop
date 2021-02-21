@@ -18,6 +18,7 @@ namespace shop.Models
         public int ShippingAddressId { get; set; }
         public int UserId { get; set; }
         public bool Payment { get; set; }
+        public bool Draft { get; set; }
 
         public virtual Address BillingAddress { get; set; }
         public virtual Address ShippingAddress { get; set; }

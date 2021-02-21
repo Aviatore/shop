@@ -218,6 +218,8 @@ namespace shop.Models
                 entity.Property(e => e.ShippingAddressId).HasColumnName("shipping_address_id");
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
+                
+                entity.Property(e => e.Draft).HasColumnName("draft");
 
                 entity.HasOne(d => d.BillingAddress)
                     .WithMany(p => p.OrderBillingAddresses)
