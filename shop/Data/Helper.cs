@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using shop.Models;
 
@@ -49,6 +50,23 @@ namespace shop.Data
                     }
                 }
              */
+        }
+
+        public static void AddNewUser(shopContext shopContext, ApplicationDbContext applicationDbContext, string email)
+        {
+            var userAuth = applicationDbContext.Users.FirstOrDefault(u => u.Email.Equals(email));
+            
+            if (userAuth != null)
+            {
+                User user = new User()
+                {
+                    Email = email,
+                    UserAuthId = userAuth.Id
+                };
+
+                shopContext.Users.Add(user);
+                shopContext.SaveChanges();
+            }
         }
     }
 }

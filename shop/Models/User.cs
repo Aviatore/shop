@@ -15,8 +15,9 @@ namespace shop.Models
 
         public int UserId { get; set; }
         
+        public string UserAuthId { get; set; }
+        
         [Display(Name = "Full Name")]
-        [Required]
         public string UserName { get; set; }
         
         [EmailAddress]
@@ -25,7 +26,6 @@ namespace shop.Models
         
         [Display(Name = "Phone number")]
         [Phone]
-        [Required]
         public string Phone { get; set; }
 
         public virtual ICollection<Order> Orders { get; set; }

@@ -19,6 +19,9 @@ namespace shop.Models
         public int UserId { get; set; }
         public bool Payment { get; set; }
         public bool Draft { get; set; }
+        public double TotalPrice { get; set; }
+        public DateTime Date { get; set; }
+        public string Status { get; set; }
 
         public virtual Address BillingAddress { get; set; }
         public virtual Address ShippingAddress { get; set; }

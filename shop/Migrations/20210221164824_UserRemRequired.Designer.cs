@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210221164824_UserRemRequired")]
+    partial class UserRemRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,10 +247,6 @@ namespace shop.Migrations
                         .HasColumnType("int")
                         .HasColumnName("billing_address_id");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("date");
-
                     b.Property<bool>("Draft")
                         .HasColumnType("bit")
                         .HasColumnName("draft");
@@ -260,15 +258,6 @@ namespace shop.Migrations
                     b.Property<int>("ShippingAddressId")
                         .HasColumnType("int")
                         .HasColumnName("shipping_address_id");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float")
-                        .HasColumnName("total_price");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int")
@@ -325,13 +314,8 @@ namespace shop.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("phone");
 
-                    b.Property<string>("UserAuthId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("user_auth_id");
-
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
