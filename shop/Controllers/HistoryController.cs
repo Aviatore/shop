@@ -19,11 +19,12 @@ namespace shop.Controllers
         public IActionResult Index()
         {
             string userId = HttpContext.Session.Get<string>("userId");
-            var user = _ctx.Users.FirstOrDefault(u => u.UserAuthId.Equals(userId));
-            _ctx.Entry(user).Collection(u => u.Orders).Load();
-            
-            var booksOrdered = _ctx.BooksOrdereds.Where(b => b.Order)
-            
+            var user = _ctx.Users
+                .Include(u => u.Orders)
+                .ThenInclude(x => x.BooksOrdereds)
+                .ThenInclude(x => x.Book)
+                .FirstOrDefault(u => u.UserAuthId.Equals(userId));
+
             return View(user);
         }
     }

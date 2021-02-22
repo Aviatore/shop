@@ -175,16 +175,11 @@ namespace shop.Migrations
                         .HasColumnType("int")
                         .HasColumnName("order_id");
 
-                    b.Property<int?>("OrderId1")
-                        .HasColumnType("int");
-
                     b.HasKey("BooksOrderedId");
 
                     b.HasIndex("BookId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
 
                     b.ToTable("books_ordered");
                 });
@@ -388,20 +383,16 @@ namespace shop.Migrations
             modelBuilder.Entity("shop.Models.BooksOrdered", b =>
                 {
                     b.HasOne("shop.Models.Book", "Book")
-                        .WithMany()
+                        .WithMany("BooksOrdereds")
                         .HasForeignKey("BookId")
                         .HasConstraintName("books_ordered_FK_1")
                         .IsRequired();
 
                     b.HasOne("shop.Models.Order", "Order")
-                        .WithMany()
+                        .WithMany("BooksOrdereds")
                         .HasForeignKey("OrderId")
                         .HasConstraintName("books_ordered_FK")
                         .IsRequired();
-
-                    b.HasOne("shop.Models.Order", null)
-                        .WithMany("BooksOrdereds")
-                        .HasForeignKey("OrderId1");
 
                     b.Navigation("Book");
 
@@ -451,6 +442,11 @@ namespace shop.Migrations
                     b.Navigation("OrderBillingAddresses");
 
                     b.Navigation("OrderShippingAddresses");
+                });
+
+            modelBuilder.Entity("shop.Models.Book", b =>
+                {
+                    b.Navigation("BooksOrdereds");
                 });
 
             modelBuilder.Entity("shop.Models.Genre", b =>
