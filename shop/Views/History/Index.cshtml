@@ -1,0 +1,33 @@
+@using System.Globalization
+@model User;
+
+@{
+    ViewBag.Title = "Orders history";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-6">@ViewBag.Title</h1>
+    
+    <table class="table table-bordered table-striped" style="width: 100%">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Order Id</th>
+            <th>Order Date</th>
+            <th>Total Price</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.Orders)
+            {
+                <tr>
+                    <td><i class="fas fa-sort-down"></i></td>
+                    <td>@order.OrderId.ToString()</td>
+                    <td>@order.Date.ToString("D", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+                    <td>@order.TotalPrice.ToString("C", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

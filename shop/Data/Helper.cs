@@ -68,5 +68,12 @@ namespace shop.Data
                 shopContext.SaveChanges();
             }
         }
+
+        public static string GetUserIdByEmail(shopContext shopContext, string email)
+        {
+            var user = shopContext.Users.FirstOrDefault(u => u.Email.Equals(email));
+
+            return user?.UserAuthId;
+        }
     }
 }
