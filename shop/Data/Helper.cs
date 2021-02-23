@@ -75,5 +75,12 @@ namespace shop.Data
 
             return user?.UserAuthId;
         }
+        
+        public static int GetUserIdById(shopContext shopContext, string id)
+        {
+            var user = shopContext.Users.First(u => u.UserAuthId.Equals(id));
+
+            return user.UserId;
+        }
     }
 }
