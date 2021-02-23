@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using shop.Data;
+using shop.Models;
+using shop.Utility;
 
 namespace shop.Areas.Identity.Pages.Account
 {
@@ -20,14 +23,17 @@ namespace shop.Areas.Identity.Pages.Account
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly shopContext _ctx;
 
         public LoginModel(SignInManager<IdentityUser> signInManager, 
             ILogger<LoginModel> logger,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            shopContext shopContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _ctx = shopContext;
         }
 
         [BindProperty]
@@ -85,6 +91,7 @@ namespace shop.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+                    HttpContext.Session.Set("userId", Helper.GetUserIdByEmail(_ctx, Input.Email));
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
