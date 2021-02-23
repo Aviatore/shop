@@ -25,7 +25,7 @@
                 <td><a href="#" class="btnToggle btn btn-primary" data-toggle="collapse" data-target="#order_@order.OrderId,#btn-show_@order.OrderId,#btn-hide_@order.OrderId" role="button">Show details</a></td>
                 <td>@order.OrderId.ToString()</td>
                 <td>@order.Date.ToString("D", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
-                <td>@order.TotalPrice.ToString("C", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+                <td>@order.BooksOrdereds.Sum(x => x.Book.Price).ToString("C", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
             </tr>
             <tr>
                 <td colspan="4">
