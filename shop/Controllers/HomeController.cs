@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using shop.Data;
 using shop.Models;
 using shop.Utilities;
 using shop.Utility;
@@ -178,20 +179,28 @@ namespace shop.Controllers
             }
 
             User user = scvm.Order.User;
-            int? userId = _dbContext.Users
+
+            /*int? userId = _dbContext.Users
                 .Where(u => u.UserName.Equals(user.UserName) && u.Email.Equals(user.Email) && u.Phone.Equals(user.Phone))
                 .Select(u => (int?)u.UserId)
-                .FirstOrDefault();
+                .FirstOrDefault();*/
 
-            if (userId.HasValue)
-                scvm.Order.UserId = userId.Value;
+            var userAuthId = HttpContext.Session.Get<string>("userId");
+            scvm.Order.UserId = Helper.GetUserIdById(_dbContext, userAuthId);
+            
+            /*if (userId.HasValue)
+                //scvm.Order.UserId = userId.Value;
+            {
+                var userAuthId = HttpContext.Session.Get<string>("userId");
+                scvm.Order.UserId = Helper.GetUserIdById(_dbContext, userAuthId);
+            }
             else
             {
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
                 _dbContext.Entry(user).GetDatabaseValues();
                 scvm.Order.UserId = user.UserId;
-            }
+            }*/
 
             var order = scvm.Order;
             scvm.Order.User = null;
@@ -289,7 +298,9 @@ namespace shop.Controllers
             {
                 var culture = CultureInfo.CreateSpecificCulture("pl-PL");
                 ViewData["Message"] = $"Thank You for your order! {price.ToString("0.00", culture)} zł was successfully charged from your bank account.";
+                string userId = HttpContext.Session.Get<string>("userId");
                 HttpContext.Session.Clear();
+                HttpContext.Session.Set("userId", userId);
                 
                 var order = _dbContext.Orders.Include(u => u.User).SingleOrDefault(o => o.OrderId == id);
                 if (order != null)
