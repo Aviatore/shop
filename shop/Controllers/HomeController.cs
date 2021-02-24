@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using shop.Data;
 using shop.Models;
 using shop.Utilities;
 using shop.Utility;
@@ -126,7 +127,7 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<OrderedBook>? orderedBooks = GetListFromCookies();
+            List<OrderedBook> orderedBooks = GetListFromCookies();
 
             if (orderedBooks != null)
             {
@@ -153,6 +154,19 @@ namespace shop.Controllers
             return RedirectToAction("ShoppingCart");
         }
 
+        public IActionResult SaveCart(string name)
+        {
+            List<OrderedBook> orderedBooks = GetListFromCookies();
+            string id = Helper.GetUserIdByEmail(_dbContext, name);
+            if (id != null)
+            {
+                int userId = Helper.GetUserIdById(_dbContext, id);
+                Helper.SaveBasketOfLoggedInUser(_dbContext, orderedBooks, userId);
+            }
+            
+            return RedirectToAction("ShoppingCart");
+        }
+
 
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
@@ -165,7 +179,7 @@ namespace shop.Controllers
             }
             
             Address billAdd = scvm.Order.BillingAddress;
-            scvm.Order.BillingAddressId = AddToAddressDBOrGetID(billAdd);
+            scvm.Order.BillingAddressId = Helper.AddAddressOrGetID(_dbContext, billAdd);
 
             if (scvm.ShippingEqualBilling || scvm.Order.BillingAddress == scvm.Order.ShippingAddress)
             {
@@ -174,7 +188,7 @@ namespace shop.Controllers
             else
             {
                 Address shipAdd = scvm.Order.ShippingAddress;
-                scvm.Order.ShippingAddressId = AddToAddressDBOrGetID(shipAdd);   
+                scvm.Order.ShippingAddressId = Helper.AddAddressOrGetID(_dbContext, shipAdd);   
             }
 
             User user = scvm.Order.User;
@@ -224,23 +238,7 @@ namespace shop.Controllers
             });
         }
 
-        private int AddToAddressDBOrGetID(Address data)
-        {
-            int? addressId = _dbContext.Addresses
-                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
-                .Select(a => (int?)a.AddressId)
-                .FirstOrDefault();
-
-            if (addressId.HasValue)
-                return addressId.Value;
-            else
-            {
-                _dbContext.Addresses.Add(data);
-                _dbContext.SaveChanges();
-                _dbContext.Entry(data).GetDatabaseValues();
-                return data.AddressId;
-            }
-        }
+        
         
         public IActionResult Payment(int orderId, double totalPrice)
         {
