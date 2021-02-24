@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -29,8 +31,14 @@ namespace UnitTests
             var myLogger = new Mock<IMyLogger>();
             return myLogger.Object;
         }
+
+        public static shopContext MoqShopContext()
+        {
+            var moqDatabase = new MockData();
+            return moqDatabase.GetTestShopContext();
+        }
         
-        public shopContext GetIndexShopContextTest()
+        public shopContext GetTestShopContext()
         {
             var options = new DbContextOptionsBuilder<shopContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
