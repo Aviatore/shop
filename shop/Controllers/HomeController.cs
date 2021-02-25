@@ -322,7 +322,7 @@ namespace shop.Controllers
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
 
-        private List<OrderedBook> GetListFromCookies()
+        public List<OrderedBook> GetListFromCookies()
         {
             if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
