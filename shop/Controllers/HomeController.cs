@@ -122,7 +122,7 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<OrderedBook>? orderedBooks = GetListFromCookies();
+            List<OrderedBook> orderedBooks = GetListFromCookies();
 
             if (orderedBooks != null)
             {
