@@ -154,6 +154,17 @@ namespace shop.Controllers
             return RedirectToAction("ShoppingCart");
         }
 
+        public IActionResult SaveCart(string name)
+        {
+            List<OrderedBook> orderedBooks = GetListFromCookies();
+            string id = Helper.GetUserIdByEmail(_dbContext, name);
+            if (id != null)
+            {
+                Helper.SaveBasketOfLoggedInUser(_dbContext, orderedBooks, id);
+            }
+            
+            return RedirectToAction("ShoppingCart");
+        }
 
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
@@ -166,7 +177,7 @@ namespace shop.Controllers
             }
             
             Address billAdd = scvm.Order.BillingAddress;
-            scvm.Order.BillingAddressId = AddToAddressDBOrGetID(billAdd);
+            scvm.Order.BillingAddressId = Helper.AddAddressToDbOrGetID(_dbContext, billAdd);
 
             if (scvm.ShippingEqualBilling || scvm.Order.BillingAddress == scvm.Order.ShippingAddress)
             {
@@ -175,7 +186,7 @@ namespace shop.Controllers
             else
             {
                 Address shipAdd = scvm.Order.ShippingAddress;
-                scvm.Order.ShippingAddressId = AddToAddressDBOrGetID(shipAdd);   
+                scvm.Order.ShippingAddressId = Helper.AddAddressToDbOrGetID(_dbContext, shipAdd);   
             }
 
             User user = scvm.Order.User;
@@ -201,55 +212,20 @@ namespace shop.Controllers
                 _dbContext.Entry(user).GetDatabaseValues();
                 scvm.Order.UserId = user.UserId;
             }*/
-
-            var order = scvm.Order;
-            scvm.Order.User = null;
-            scvm.Order.BillingAddress = null;
-            scvm.Order.ShippingAddress = null;
-            _dbContext.Orders.Add(order);
-            _dbContext.SaveChanges();
-            _dbContext.Entry(order).GetDatabaseValues();
-            int orrderId = order.OrderId;
             
-            _myLogger.Add(orrderId, "Order data accepted");
-
-            foreach (var item in scvm.Basket)
-            {
-                var book = new BooksOrdered();
-                book.BookId = item.BookId;
-                book.OrderId = orrderId;
-                for (var i = 0; i < item.Quantity; i++)
-                {
-                    _dbContext.BooksOrdereds.Add(book);
-                }
-                _dbContext.SaveChanges();
-            }
+            int orderId = Helper.AddOrderToDbOrGetId(_dbContext, scvm.Order);
             
+            _myLogger.Add(orderId, "Order data accepted");
+
+            Helper.AddOrderedBooksToDb(_dbContext, orderId, scvm.Basket);
 
             return RedirectToAction("Payment", new
             {
-                orderId = orrderId,
+                orderId = orderId,
                 totalPrice = scvm.TotalPrice()
             });
         }
-
-        private int AddToAddressDBOrGetID(Address data)
-        {
-            int? addressId = _dbContext.Addresses
-                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
-                .Select(a => (int?)a.AddressId)
-                .FirstOrDefault();
-
-            if (addressId.HasValue)
-                return addressId.Value;
-            else
-            {
-                _dbContext.Addresses.Add(data);
-                _dbContext.SaveChanges();
-                _dbContext.Entry(data).GetDatabaseValues();
-                return data.AddressId;
-            }
-        }
+        
         
         public IActionResult Payment(int orderId, double totalPrice)
         {

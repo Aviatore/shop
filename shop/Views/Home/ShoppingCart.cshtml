@@ -3,12 +3,21 @@
 }
 
 @using System.Globalization
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
 @model ShoppingCartViewModel
 
 <div class="text-center">
     <h1 class="display-4">Your Shopping Cart</h1>
     @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
 </div>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <p>@ViewData["Message"]</p>
+    <a asp-controller="Home" asp-action="SaveCart" asp-route-value="1" asp-route-name="@User.Identity.Name" class="btn btn-primary btn-block">Save my cart</a>
+}
+
 <div>
     <table class="table table-striped">
         <tr>

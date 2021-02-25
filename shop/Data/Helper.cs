@@ -72,7 +72,7 @@ namespace shop.Data
         public static string GetUserIdByEmail(shopContext shopContext, string email)
         {
             var user = shopContext.Users.FirstOrDefault(u => u.Email.Equals(email));
-
+        
             return user?.UserAuthId;
         }
         
@@ -81,6 +81,99 @@ namespace shop.Data
             var user = shopContext.Users.First(u => u.UserAuthId.Equals(id));
 
             return user.UserId;
+        }
+        
+        public static int AddAddressOrGetID(shopContext shopContext, Address data)
+        {
+            int? addressId = shopContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                shopContext.Addresses.Add(data);
+                shopContext.SaveChanges();
+                shopContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
+        
+
+        public static void SaveBasketOfLoggedInUser(shopContext shopContext, List<OrderedBook> list, string authId)
+        {
+            int userId = GetUserIdById(shopContext, authId);
+            
+            var order = new Order();
+            order.UserId = userId;
+            order.Draft = true;
+            
+            //TODO: real addresses
+            order.BillingAddressId = 1;
+            order.ShippingAddressId = 1;
+            
+            shopContext.Orders.Add(order);
+            shopContext.SaveChanges();
+            shopContext.Entry(order).GetDatabaseValues();
+            int orderId = order.OrderId;
+            
+            foreach (var item in list)
+            {
+                var book = new BooksOrdered();
+                book.BookId = item.BookId;
+                book.OrderId = orderId;
+                for (var i = 0; i < item.Quantity; i++)
+                {
+                    shopContext.BooksOrdereds.Add(book);
+                }
+                shopContext.SaveChanges();
+            }
+        }
+        
+        public static int AddAddressToDbOrGetID(shopContext shopContext, Address data)
+        {
+            int? addressId = shopContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                shopContext.Addresses.Add(data);
+                shopContext.SaveChanges();
+                shopContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
+
+        public static int AddOrderToDbOrGetId(shopContext shopContext, Order order)
+        {
+            order.User = null;
+            order.BillingAddress = null;
+            order.ShippingAddress = null;
+            shopContext.Orders.Add(order);
+            shopContext.SaveChanges();
+            shopContext.Entry(order).GetDatabaseValues();
+            return order.OrderId;
+        }
+
+        public static void AddOrderedBooksToDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
+        {
+            foreach (var item in basket)
+            {
+                var book = new BooksOrdered();
+                book.BookId = item.BookId;
+                book.OrderId = orderId;
+                for (var i = 0; i < item.Quantity; i++)
+                {
+                    shopContext.BooksOrdereds.Add(book);
+                }
+                shopContext.SaveChanges();
+            }
         }
     }
 }
