@@ -159,8 +159,7 @@ namespace UnitTests
                 homeController.ControllerContext = controllerContext;
 
                 var action = homeController.RedirectToBooksByPublishers() as RedirectToActionResult;
-
-                // action.Should().Be("Home");
+                
                 Assert.Equal("BooksByPublisher", action.ActionName);
                 Assert.Equal("Home", action.ControllerName);
                 Assert.Equal("1", action.RouteValues["publisherId"].ToString());
@@ -170,6 +169,7 @@ namespace UnitTests
         [Theory(DisplayName = "AddBooksToSessionBasket checking adding items to an empty basket")]
         [InlineData(1, 2)]
         [InlineData(2, 6)]
+        [InlineData(10, 5)]
         public void AddBooksToSessionBasket_CheckAddItemToEmptyBasket(int id, int quantity)
         {
             using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
@@ -188,8 +188,11 @@ namespace UnitTests
 
                 var result = homeController.AddBooksToSessionBasket(id, quantity).ToList();
 
-                Assert.Equal(expectedOrderedBookList.ElementAt(0).BookId, result.ElementAt(0).BookId);
-                Assert.Equal(expectedOrderedBookList.ElementAt(0).Quantity, result.ElementAt(0).Quantity);
+                int actualQuantity = result.FirstOrDefault(x => x.BookId == id)?.Quantity ?? 0;
+                int actualId = result.FirstOrDefault(x => x.BookId == id)?.BookId ?? 0;
+                
+                Assert.Equal(id, actualId);
+                Assert.Equal(quantity, actualQuantity);
             }
         }
 
@@ -237,6 +240,80 @@ namespace UnitTests
                     Assert.Equal(id, actualId);
                     Assert.Equal(quantity + quantityFromSession, actualQuantity);
                 }
+            }
+        }
+
+        [Theory (DisplayName = "Checking the redirection to the Index after adding the product to the cart")]
+        [InlineData(1, 1)]
+        [InlineData(2, 3)]
+        public void IndexPost_CheckRedirectionAndSession(int id, int quantity)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+
+                homeController.ControllerContext = controllerContext;
+
+                var action = homeController.IndexPost(id, quantity) as RedirectToActionResult;
+                
+                Assert.Equal("Index", action.ActionName);
+            }
+        }
+        
+        [Theory (DisplayName = "Checking the redirection to the BookDetails after adding the product to the cart")]
+        [InlineData(2, 4)]
+        [InlineData(3, 1)]
+        public void BookDetailsPost_CheckRedirectionAndSession(int id, int quantity)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+
+                homeController.ControllerContext = controllerContext;
+
+                var action = homeController.BookDetailsPost(id, quantity) as RedirectToActionResult;
+                
+                Assert.Equal("BookDetails", action.ActionName);
+            }
+        }
+        
+        [Theory (DisplayName = "Checking the redirection to the BooksByGenre after adding the product to the cart")]
+        [InlineData(1, 4, 2)]
+        [InlineData(4, 1, 3)]
+        public void BooksByGenrePost_CheckRedirectionAndSession(int id, int quantity, int gId)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var formCollection = new FormCollection(new Dictionary<string, StringValues>()
+                {
+                    {"Genres", gId.ToString()}
+                });
+                
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        Session = new MockHttpSession(), 
+                        Request = { Form = formCollection }
+                    },
+                };
+
+                homeController.ControllerContext = controllerContext;
+                
+
+                var action = homeController.BooksByGenrePost(id, quantity, gId) as RedirectToActionResult;
+                
+                Assert.Equal("BooksByGenre", action.ActionName);
+                Assert.Equal(gId.ToString(), action.RouteValues["genreId"].ToString());
             }
         }
     }
