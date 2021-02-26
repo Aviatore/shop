@@ -245,7 +245,7 @@ namespace shop.Controllers
                 return View("Payment", pvm);
             }
 
-            // TO TEST ONLY!
+            // THIS IF IS TO TEST ONLY!
             if (pvm.TotalPrice < 500)
             {
                 pvm.SuccessfulPayment = true;
@@ -320,7 +320,6 @@ namespace shop.Controllers
             {
                 orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
             }
-
             
             if (orderedBooks.Count > 0)
             {
@@ -332,7 +331,7 @@ namespace shop.Controllers
                         var sum = book.Quantity + quantity;
                         book.Quantity = sum;
                         isAdd = true;
-
+            
                         if (book.Quantity <= 0)
                         {
                             orderedBooks.Remove(book);
@@ -340,7 +339,7 @@ namespace shop.Controllers
                         break;
                     }
                 }
-
+            
                 if (!isAdd)
                 {
                     orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
@@ -349,7 +348,7 @@ namespace shop.Controllers
                 {
                     isAdd = false;
                 }
-
+            
             }
             else
             {

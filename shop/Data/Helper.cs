@@ -104,18 +104,8 @@ namespace shop.Data
             shopContext.SaveChanges();
             shopContext.Entry(order).GetDatabaseValues();
             int orderId = order.OrderId;
-            
-            foreach (var item in list)
-            {
-                var book = new BooksOrdered();
-                book.BookId = item.BookId;
-                book.OrderId = orderId;
-                for (var i = 0; i < item.Quantity; i++)
-                {
-                    shopContext.BooksOrdered.Add(book);
-                }
-                shopContext.SaveChanges();
-            }
+
+            AddOrderedBooksToDb(shopContext, orderId, list);
         }
         
         public static int AddAddressToDbOrGetID(shopContext shopContext, Address data)
@@ -149,23 +139,24 @@ namespace shop.Data
 
         public static void AddOrderedBooksToDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
         {
-            //TODO: to debug!
             foreach (var item in basket)
             {
-                var book = new BooksOrdered();
-                book.BookId = item.BookId;
-                book.OrderId = orderId;
+                IList<BooksOrdered> booksOrdereds = new List<BooksOrdered>();
                 for (var i = 0; i < item.Quantity; i++)
                 {
-                    shopContext.BooksOrdered.Add(book);
+                    var book = new BooksOrdered();
+                    book.BookId = item.BookId;
+                    book.OrderId = orderId;
+                    booksOrdereds.Add(book);
                 }
+                shopContext.BooksOrdered.AddRange(booksOrdereds);
+                shopContext.SaveChanges();
             }
-            shopContext.SaveChanges();
         }
 
         public static List<OrderedBook> GetListOfBooksInSavedShoppingCart(shopContext shopContext, string userId)
         {
-            int? orderId = shopContext.Orders
+            var orderId = shopContext.Orders
                 .Where(o => o.User.UserAuthId == userId && o.Draft == true)
                 .OrderByDescending(o => o.Date)
                 .Select(o => o.OrderId)
@@ -179,49 +170,65 @@ namespace shop.Data
                     .ToList();
 
                 List<OrderedBook> orderedBooks = new List<OrderedBook>();
+                var hash = new HashSet<int>();
 
                 foreach (var id in bookIds)
                 {
-                    if (orderedBooks.Count > 0)
+                    int quantity = 0;
+                    if (hash.Add(id))
                     {
-                        bool isAdd = false;
-                        foreach (var book in orderedBooks)
-                        {
-                            if (book.BookId == id)
-                            {
-                                var sum = book.Quantity++;
-                                book.Quantity = sum;
-                                isAdd = true;
-
-                                if (book.Quantity <= 0)
-                                {
-                                    orderedBooks.Remove(book);
-                                }
-
-                                break;
-                            }
-                        }
-
-                        if (!isAdd)
-                        {
-                            orderedBooks.Add(new OrderedBook {BookId = id, Quantity = 1});
-                        }
-                        else
-                        {
-                            isAdd = false;
-                        }
-
+                        quantity = bookIds
+                            .Where(i => i == id)
+                            .Count();
+                    
+                        orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
                     }
-                    else
-                    {
-                        orderedBooks.Add(new OrderedBook {BookId = id, Quantity = 1});
-                    }
-
-                    return orderedBooks;
                 }
+
+                return orderedBooks;
             }
 
             return null;
+        }
+
+        public static List<OrderedBook> ChangeQuantityOfBooks(int bookId, List<OrderedBook> orderedBooks)
+        {
+            if (orderedBooks.Count > 0)
+            {
+                bool isAdd = false;
+                foreach (var book in orderedBooks)
+                {
+                    if (book.BookId == bookId)
+                    {
+                        var sum = book.Quantity++;
+                        book.Quantity = sum;
+                        isAdd = true;
+
+                        if (book.Quantity <= 0)
+                        {
+                            orderedBooks.Remove(book);
+                        }
+
+                        break;
+                    }
+                }
+
+                if (!isAdd)
+                {
+                    orderedBooks.Add(new OrderedBook {BookId = bookId, Quantity = 1});
+                }
+                else
+                {
+                    isAdd = false;
+                }
+
+            }
+            else
+            {
+                orderedBooks.Add(new OrderedBook {BookId = bookId, Quantity = 1});
+            }
+
+            return orderedBooks;
         }
     }
 }
