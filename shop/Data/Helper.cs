@@ -95,6 +95,7 @@ namespace shop.Data
             var order = new Order();
             order.UserId = userId;
             order.Draft = true;
+            order.Date = DateTime.Now;
             
             //TODO: real addresses
             order.BillingAddressId = 1;
@@ -131,6 +132,7 @@ namespace shop.Data
             order.User = null;
             order.BillingAddress = null;
             order.ShippingAddress = null;
+            order.Date = DateTime.Now;
             shopContext.Orders.Add(order);
             shopContext.SaveChanges();
             shopContext.Entry(order).GetDatabaseValues();
