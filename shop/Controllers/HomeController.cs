@@ -290,9 +290,7 @@ namespace shop.Controllers
             {
                 ViewData["Message"] = "We couldn't charge your account...";
             }
-
-            //email
-
+            
             return View("OrderConfirmation", (id, price, success));
         }
 
@@ -303,7 +301,7 @@ namespace shop.Controllers
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
 
-        private List<OrderedBook>? GetListFromCookies()
+        private List<OrderedBook> GetListFromCookies()
         {
             if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())

@@ -22,7 +22,7 @@ namespace shop.Models
         public virtual DbSet<Author> Authors { get; set; }
         public virtual DbSet<AuthorBook> AuthorBooks { get; set; }
         public virtual DbSet<Book> Books { get; set; }
-        public virtual DbSet<BooksOrdered> BooksOrdereds { get; set; }
+        public virtual DbSet<BooksOrdered> BooksOrdered { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
         public virtual DbSet<Order> Orders { get; set; }

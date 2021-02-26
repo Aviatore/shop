@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using shop.Controllers;
 using shop.Models;
+using shop.Utility;
 
 namespace shop.Data
 {
@@ -83,23 +86,6 @@ namespace shop.Data
             return user.UserId;
         }
         
-        public static int AddAddressOrGetID(shopContext shopContext, Address data)
-        {
-            int? addressId = shopContext.Addresses
-                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
-                .Select(a => (int?)a.AddressId)
-                .FirstOrDefault();
-
-            if (addressId.HasValue)
-                return addressId.Value;
-            else
-            {
-                shopContext.Addresses.Add(data);
-                shopContext.SaveChanges();
-                shopContext.Entry(data).GetDatabaseValues();
-                return data.AddressId;
-            }
-        }
         
 
         public static void SaveBasketOfLoggedInUser(shopContext shopContext, List<OrderedBook> list, string authId)
@@ -126,7 +112,7 @@ namespace shop.Data
                 book.OrderId = orderId;
                 for (var i = 0; i < item.Quantity; i++)
                 {
-                    shopContext.BooksOrdereds.Add(book);
+                    shopContext.BooksOrdered.Add(book);
                 }
                 shopContext.SaveChanges();
             }
@@ -163,6 +149,7 @@ namespace shop.Data
 
         public static void AddOrderedBooksToDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
         {
+            //TODO: to debug!
             foreach (var item in basket)
             {
                 var book = new BooksOrdered();
@@ -170,10 +157,71 @@ namespace shop.Data
                 book.OrderId = orderId;
                 for (var i = 0; i < item.Quantity; i++)
                 {
-                    shopContext.BooksOrdereds.Add(book);
+                    shopContext.BooksOrdered.Add(book);
                 }
-                shopContext.SaveChanges();
             }
+            shopContext.SaveChanges();
+        }
+
+        public static List<OrderedBook> GetListOfBooksInSavedShoppingCart(shopContext shopContext, string userId)
+        {
+            int? orderId = shopContext.Orders
+                .Where(o => o.User.UserAuthId == userId && o.Draft == true)
+                .OrderByDescending(o => o.Date)
+                .Select(o => o.OrderId)
+                .FirstOrDefault();
+
+            if (orderId != null)
+            {
+                List<int> bookIds = shopContext.BooksOrdered
+                    .Where(b => b.OrderId == orderId)
+                    .Select(b => b.BookId)
+                    .ToList();
+
+                List<OrderedBook> orderedBooks = new List<OrderedBook>();
+
+                foreach (var id in bookIds)
+                {
+                    if (orderedBooks.Count > 0)
+                    {
+                        bool isAdd = false;
+                        foreach (var book in orderedBooks)
+                        {
+                            if (book.BookId == id)
+                            {
+                                var sum = book.Quantity++;
+                                book.Quantity = sum;
+                                isAdd = true;
+
+                                if (book.Quantity <= 0)
+                                {
+                                    orderedBooks.Remove(book);
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (!isAdd)
+                        {
+                            orderedBooks.Add(new OrderedBook {BookId = id, Quantity = 1});
+                        }
+                        else
+                        {
+                            isAdd = false;
+                        }
+
+                    }
+                    else
+                    {
+                        orderedBooks.Add(new OrderedBook {BookId = id, Quantity = 1});
+                    }
+
+                    return orderedBooks;
+                }
+            }
+
+            return null;
         }
     }
 }

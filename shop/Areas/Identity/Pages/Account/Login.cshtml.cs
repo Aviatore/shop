@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using shop.Controllers;
 using shop.Data;
 using shop.Models;
 using shop.Utility;
@@ -91,7 +92,12 @@ namespace shop.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    HttpContext.Session.Set("userId", Helper.GetUserIdByEmail(_ctx, Input.Email));
+                    string authId = Helper.GetUserIdByEmail(_ctx, Input.Email);
+                    HttpContext.Session.Set("userId", authId);
+                    
+                    var savedBooks = Helper.GetListOfBooksInSavedShoppingCart(_ctx, authId);
+                    HttpContext.Session.Set(WebConst.SessionCart, savedBooks);
+                    
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
