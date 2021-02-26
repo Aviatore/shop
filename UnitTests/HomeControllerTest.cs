@@ -378,7 +378,7 @@ namespace UnitTests
                 Assert.Equal(4, result.FirstOrDefault(x => x.BookId == 2)?.Quantity ?? 0);
             }
         }
-        
+
         [Fact(DisplayName = "GetListFromCookies if empty return null")]
         public void GetListFromCookies_IfEmptyReturnNull()
         {
@@ -400,7 +400,7 @@ namespace UnitTests
                 Assert.Null(result);
             }
         }
-        
+
         [Fact(DisplayName = "GetListFromCookies if null return null")]
         public void GetListFromCookies_IfNullReturnNull()
         {
@@ -420,7 +420,7 @@ namespace UnitTests
                 Assert.Null(result);
             }
         }
-        
+
         [Fact(DisplayName = "ShoppingCart if null redirect to Index")]
         public void ShoppingCart_IfNullRedirectToIndex()
         {
@@ -440,7 +440,7 @@ namespace UnitTests
                 Assert.Equal("Index", action.ActionName);
             }
         }
-        
+
         [Fact(DisplayName = "ShoppingCart should return valid model")]
         public void ShoppingCart_ShouldReturnValidModel()
         {
@@ -454,7 +454,7 @@ namespace UnitTests
                 mockOrderedBookList.Add(orderedBook1);
                 mockOrderedBookList.Add(orderedBook2);
                 mockOrderedBookList.Add(orderedBook3);
-                
+
                 var controllerContext = new ControllerContext()
                 {
                     HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
@@ -472,6 +472,57 @@ namespace UnitTests
                 Assert.Equal(2, model.Basket.FirstOrDefault(x => x.BookId == 3)?.Quantity);
                 Assert.Equal(70.1, model.Basket.FirstOrDefault(x => x.BookId == 3)?.Price);
             }
+        }
+
+        [Theory(DisplayName =
+            "ShoppingCartUpdate checking the redirection to the ShoppingCart after updating the product to the cart")]
+        [InlineData(1, 1)]
+        [InlineData(2, 2)]
+        [InlineData(4, -1)]
+        [InlineData(3, -4)]
+        [InlineData(2, -4)]
+        public void ShoppingCartUpdate_CheckRedirection(int id, int value)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                OrderedBook orderedBook1 = new OrderedBook {BookId = 1, Quantity = 3};
+                OrderedBook orderedBook2 = new OrderedBook {BookId = 2, Quantity = 4};
+                OrderedBook orderedBook3 = new OrderedBook {BookId = 4, Quantity = 2};
+                OrderedBook orderedBook4 = new OrderedBook {BookId = 3, Quantity = 3};
+                List<OrderedBook> mockOrderedBookList = new List<OrderedBook>();
+                mockOrderedBookList.Add(orderedBook1);
+                mockOrderedBookList.Add(orderedBook2);
+                mockOrderedBookList.Add(orderedBook3);
+                mockOrderedBookList.Add(orderedBook4);
+
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+
+                homeController.ControllerContext = controllerContext;
+                homeController.HttpContext.Session.Set(WebConst.SessionCart, mockOrderedBookList);
+
+                var action = homeController.ShoppingCartUpdate(id, value) as RedirectToActionResult;
+
+                Assert.Equal("ShoppingCart", action.ActionName);
+            }
+        }
+
+        [Fact(DisplayName = "ShoppingCartViewModel check methods TotalPrice and TotalAmount")]
+        public void ShoppingCartViewModel_CheckMethods()
+        {
+            ShoppingCartViewModel scvm = new ShoppingCartViewModel
+            {
+                Basket = MockData.GetMoqOrderedBooksList().ToList()
+            };
+
+            double totalPrice = scvm.TotalPrice();
+            double totalAmount = scvm.TotalAmount();
+
+            Assert.Equal(10, totalAmount);
+            Assert.Equal(906.94, totalPrice);
         }
     }
 }
