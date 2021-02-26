@@ -332,26 +332,6 @@ namespace UnitTests
             context.Books.AddRange(bookId01, bookId02, bookId03, bookId04, bookId05, bookId06,
                 bookId07, bookId08, bookId09, bookId10, bookId11);
 
-            // List<Book> books = new List<Book>
-            // {
-            //     bookId01, bookId02, bookId03, bookId04, bookId05, bookId06,
-            //     bookId07, bookId08, bookId09, bookId10, bookId11
-            // };
-
-            // genre1.Books = books;
-            // genre2.Books = books;
-            // genre3.Books = books;
-            // genre4.Books = books;
-            // genre5.Books = books;
-            // genre6.Books = books;
-            //
-            // publisher1.Books = books;
-            // publisher2.Books = books;
-            // publisher3.Books = books;
-            // publisher4.Books = books;
-            // publisher5.Books = books;
-            // publisher5.Books = books;
-
             var user1 = new User
             {
                 UserId = 1,
@@ -371,7 +351,7 @@ namespace UnitTests
             };
             
             context.Users.AddRange(user1, user2);
-
+            
             var address1 = new Address
             {
                 AddressId = 1,
@@ -419,7 +399,7 @@ namespace UnitTests
             
             context.Addresses.AddRange(address1, address2, address3,
                 address4, address5);
-
+            
             var order1 = new Order
             {
                 OrderId = 1,
@@ -438,7 +418,7 @@ namespace UnitTests
             
             var order2 = new Order
             {
-                OrderId = 1,
+                OrderId = 2,
                 BillingAddressId = 2,
                 ShippingAddressId = 2,
                 UserId = 2,
@@ -485,7 +465,7 @@ namespace UnitTests
             };
             
             context.Orders.AddRange(order1, order2, order3, order4);
-
+            
             var booksOrdered01 = new BooksOrdered
             {
                 BooksOrderedId = 1,
@@ -556,11 +536,6 @@ namespace UnitTests
                 BookId = 9,
                 Book = bookId09,
                 Order = order3
-                // 9	3	9
-                // 10	4	4
-                // 11	4	6
-                // 12	4	6
-                // 13	4	6
             };
             
             var booksOrdered09 = new BooksOrdered
@@ -611,7 +586,154 @@ namespace UnitTests
             context.BooksOrdereds.AddRange(booksOrdered01, booksOrdered02, booksOrdered03,
                 booksOrdered04, booksOrdered05, booksOrdered06, booksOrdered07, booksOrdered08,
                 booksOrdered09, booksOrdered10, booksOrdered11, booksOrdered12, booksOrdered13);
-
+            
+            var log01 = new Log
+            {
+                LogId = 1,
+                OrderId = 1,
+                Msg = "Order data accepted",
+                Timestamp = new DateTime(2021, 02, 26, 11, 53, 08),
+                Order = order1
+            };
+            
+            var log02 = new Log
+            {
+                LogId = 2,
+                OrderId = 1,
+                Msg = "Start payment",
+                Timestamp = new DateTime(2021, 02, 26, 11, 53, 30),
+                Order = order1
+            };
+            
+            var log03 = new Log
+            {
+                LogId = 3,
+                OrderId = 1,
+                Msg = "Payment accepted",
+                Timestamp = new DateTime(2021, 02, 26, 11, 53, 45),
+                Order = order1
+            };
+            
+            var log04 = new Log
+            {
+                LogId = 4,
+                OrderId = 1,
+                Msg = "Sent order confirmation",
+                Timestamp = new DateTime(2021, 02, 26, 11, 53, 55),
+                Order = order1
+            };
+            
+            var log05 = new Log
+            {
+                LogId = 5,
+                OrderId = 2,
+                Msg = "Order data accepted",
+                Timestamp = new DateTime(2021, 02, 26, 11, 59, 56),
+                Order = order2
+            };
+            
+            var log06 = new Log
+            {
+                LogId = 6,
+                OrderId = 2,
+                Msg = "Start payment",
+                Timestamp = new DateTime(2021, 02, 26, 12, 00, 5),
+                Order = order2
+            };
+            
+            var log07 = new Log
+            {
+                LogId = 7,
+                OrderId = 2,
+                Msg = "Payment accepted",
+                Timestamp = new DateTime(2021, 02, 26, 12, 00, 28),
+                Order = order2
+            };
+            
+            var log08 = new Log
+            {
+                LogId = 8,
+                OrderId = 2,
+                Msg = "Sent order confirmation",
+                Timestamp = new DateTime(2021, 02, 26, 12, 00, 31),
+                Order = order2
+            };
+            
+            var log09 = new Log
+            {
+                LogId = 9,
+                OrderId = 3,
+                Msg = "Order data accepted",
+                Timestamp = new DateTime(2021, 02, 26, 12, 27, 21),
+                Order = order3
+            };
+            
+            var log10 = new Log
+            {
+                LogId = 10,
+                OrderId = 3,
+                Msg = "Start payment",
+                Timestamp = new DateTime(2021, 02, 26, 12, 27, 38),
+                Order = order3
+            };
+            
+            var log11 = new Log
+            {
+                LogId = 11,
+                OrderId = 3,
+                Msg = "Payment accepted",
+                Timestamp = new DateTime(2021, 02, 26, 12, 28, 44),
+                Order = order3
+            };
+            
+            var log12 = new Log
+            {
+                LogId = 12,
+                OrderId = 3,
+                Msg = "Sent order confirmation",
+                Timestamp = new DateTime(2021, 02, 26, 12, 28, 49),
+                Order = order3
+            };
+            
+            var log13 = new Log
+            {
+                LogId = 13,
+                OrderId = 4,
+                Msg = "Order data accepted",
+                Timestamp = new DateTime(2021, 02, 26, 17, 32, 11),
+                Order = order4
+            };
+            
+            var log14 = new Log
+            {
+                LogId = 14,
+                OrderId = 4,
+                Msg = "Start payment",
+                Timestamp = new DateTime(2021, 02, 26, 17, 32, 27),
+                Order = order4
+            };
+            
+            var log15 = new Log
+            {
+                LogId = 15,
+                OrderId = 4,
+                Msg = "Payment accepted",
+                Timestamp = new DateTime(2021, 02, 26, 17, 32, 51),
+                Order = order4
+            };
+            
+            var log16 = new Log
+            {
+                LogId = 16,
+                OrderId = 4,
+                Msg = "Sent order confirmation",
+                Timestamp = new DateTime(2021, 02, 26, 17, 32, 53),
+                Order = order4
+            };
+            
+            context.Logs.AddRange(log01, log02, log03, log04, log05, log06, log07,
+                log08, log09, log10, log11, log12, log13, log14, log15, log16);
+            
             context.SaveChanges();
 
             return context;
