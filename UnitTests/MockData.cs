@@ -352,6 +352,266 @@ namespace UnitTests
             // publisher5.Books = books;
             // publisher5.Books = books;
 
+            var user1 = new User
+            {
+                UserId = 1,
+                UserName = null,
+                Email = "brzozasr@gmail.com",
+                Phone = null,
+                UserAuthId = "6040582f-0c20-44dc-8acc-b684479454b0"
+            };
+            
+            var user2 = new User
+            {
+                UserId = 2,
+                UserName = null,
+                Email = "spm1@interia.pl",
+                Phone = null,
+                UserAuthId = "8befe3cc-024b-4084-ab38-8f5c7663cd1d"
+            };
+            
+            context.Users.AddRange(user1, user2);
+
+            var address1 = new Address
+            {
+                AddressId = 1,
+                Street = "Aspekt 20",
+                City = "Warsaw",
+                Country = "Poland",
+                ZipCode = "01-904"
+            };
+            
+            var address2 = new Address
+            {
+                AddressId = 2,
+                Street = "Pl. Zwyciestwa 12",
+                City = "Cracow",
+                Country = "Poland",
+                ZipCode = "12-345"
+            };
+            
+            var address3 = new Address
+            {
+                AddressId = 3,
+                Street = "Sokratesa 15",
+                City = "Warsaw",
+                Country = "Poland",
+                ZipCode = "01-920"
+            };
+            
+            var address4 = new Address
+            {
+                AddressId = 4,
+                Street = "Spacerowa 23",
+                City = "Warsaw",
+                Country = "Poland",
+                ZipCode = "12-678"
+            };
+            
+            var address5 = new Address
+            {
+                AddressId = 5,
+                Street = "Bergen 2",
+                City = "Copenhagen",
+                Country = "Denmark",
+                ZipCode = "345-234"
+            };
+            
+            context.Addresses.AddRange(address1, address2, address3,
+                address4, address5);
+
+            var order1 = new Order
+            {
+                OrderId = 1,
+                BillingAddressId = 1,
+                ShippingAddressId = 1,
+                UserId = 1,
+                Payment = true,
+                Draft = false,
+                Date = new DateTime(2021, 2, 18, 16, 32, 15),
+                Status = null,
+                TotalPrice = 0.00,
+                BillingAddress = address1,
+                ShippingAddress = address1,
+                User = user1
+            };
+            
+            var order2 = new Order
+            {
+                OrderId = 1,
+                BillingAddressId = 2,
+                ShippingAddressId = 2,
+                UserId = 2,
+                Payment = true,
+                Draft = false,
+                Date = new DateTime(2021, 2, 20, 12, 30, 23),
+                Status = null,
+                TotalPrice = 0.00,
+                BillingAddress = address2,
+                ShippingAddress = address2,
+                User = user2
+            };
+            
+            var order3 = new Order
+            {
+                OrderId = 3,
+                BillingAddressId = 3,
+                ShippingAddressId = 3,
+                UserId = 1,
+                Payment = true,
+                Draft = false,
+                Date = new DateTime(2021, 2, 21, 9, 12, 20),
+                Status = null,
+                TotalPrice = 0.00,
+                BillingAddress = address3,
+                ShippingAddress = address3,
+                User = user1
+            };
+            
+            var order4 = new Order
+            {
+                OrderId = 4,
+                BillingAddressId = 4,
+                ShippingAddressId = 5,
+                UserId = 2,
+                Payment = true,
+                Draft = false,
+                Date = new DateTime(2021, 2, 25, 16, 35, 59),
+                Status = null,
+                TotalPrice = 0.00,
+                BillingAddress = address4,
+                ShippingAddress = address5,
+                User = user2
+            };
+            
+            context.Orders.AddRange(order1, order2, order3, order4);
+
+            var booksOrdered01 = new BooksOrdered
+            {
+                BooksOrderedId = 1,
+                OrderId = 1,
+                BookId = 1,
+                Book = bookId01,
+                Order = order1
+            };
+            
+            var booksOrdered02 = new BooksOrdered
+            {
+                BooksOrderedId = 2,
+                OrderId = 1,
+                BookId = 6,
+                Book = bookId06,
+                Order = order1
+            };
+            
+            var booksOrdered03 = new BooksOrdered
+            {
+                BooksOrderedId = 3,
+                OrderId = 2,
+                BookId = 7,
+                Book = bookId07,
+                Order = order2
+            };
+            
+            var booksOrdered04 = new BooksOrdered
+            {
+                BooksOrderedId = 4,
+                OrderId = 2,
+                BookId = 11,
+                Book = bookId11,
+                Order = order2
+            };
+            
+            var booksOrdered05 = new BooksOrdered
+            {
+                BooksOrderedId = 5,
+                OrderId = 2,
+                BookId = 1,
+                Book = bookId01,
+                Order = order2
+            };
+            
+            var booksOrdered06 = new BooksOrdered
+            {
+                BooksOrderedId = 6,
+                OrderId = 2,
+                BookId = 1,
+                Book = bookId01,
+                Order = order2
+            };
+            
+            var booksOrdered07 = new BooksOrdered
+            {
+                BooksOrderedId = 7,
+                OrderId = 3,
+                BookId = 3,
+                Book = bookId03,
+                Order = order3
+            };
+            
+            var booksOrdered08 = new BooksOrdered
+            {
+                BooksOrderedId = 8,
+                OrderId = 3,
+                BookId = 9,
+                Book = bookId09,
+                Order = order3
+                // 9	3	9
+                // 10	4	4
+                // 11	4	6
+                // 12	4	6
+                // 13	4	6
+            };
+            
+            var booksOrdered09 = new BooksOrdered
+            {
+                BooksOrderedId = 9,
+                OrderId = 3,
+                BookId = 9,
+                Book = bookId09,
+                Order = order3
+            };
+            
+            var booksOrdered10 = new BooksOrdered
+            {
+                BooksOrderedId = 10,
+                OrderId = 4,
+                BookId = 4,
+                Book = bookId04,
+                Order = order4
+            };
+            
+            var booksOrdered11 = new BooksOrdered
+            {
+                BooksOrderedId = 11,
+                OrderId = 4,
+                BookId = 6,
+                Book = bookId06,
+                Order = order4
+            };
+            
+            var booksOrdered12 = new BooksOrdered
+            {
+                BooksOrderedId = 12,
+                OrderId = 4,
+                BookId = 6,
+                Book = bookId06,
+                Order = order4
+            };
+            
+            var booksOrdered13 = new BooksOrdered
+            {
+                BooksOrderedId = 13,
+                OrderId = 4,
+                BookId = 6,
+                Book = bookId06,
+                Order = order4
+            };
+            
+            context.BooksOrdereds.AddRange(booksOrdered01, booksOrdered02, booksOrdered03,
+                booksOrdered04, booksOrdered05, booksOrdered06, booksOrdered07, booksOrdered08,
+                booksOrdered09, booksOrdered10, booksOrdered11, booksOrdered12, booksOrdered13);
+
             context.SaveChanges();
 
             return context;
