@@ -771,5 +771,25 @@ namespace UnitTests
                 Assert.Equal(totalPrice.ToString(CultureInfo.InvariantCulture), action?.RouteValues["totalPrice"]?.ToString());
             }
         }
+
+        [Theory]
+        [InlineData(5, 345.78)]
+        [InlineData(8, 1231.34)]
+        [InlineData(1, 279.41)]
+        public void Payment_CheckPaymentViewModel(int orderId, double totalPrice)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var result = homeController.Payment(orderId, totalPrice) as ViewResult;
+                var model = result.Model as PaymentViewModel;
+
+                Assert.NotNull(model);
+                Assert.NotNull(result);
+                Assert.IsAssignableFrom<ViewResult>(result);
+                Assert.Equal(orderId, model.OrderId);
+                Assert.Equal(totalPrice, model.TotalPrice);
+            } 
+        }
     }
 }
