@@ -81,7 +81,7 @@ namespace shop.Data
         
         public static int GetUserIdById(shopContext shopContext, string id)
         {
-            var user = shopContext.Users.First(u => u.UserAuthId.Equals(id));
+            var user = shopContext.Users.First(u => u.UserAuthId == id);
 
             return user.UserId;
         }
@@ -127,16 +127,35 @@ namespace shop.Data
             }
         }
 
-        public static int AddOrderToDbOrGetId(shopContext shopContext, Order order)
+        public static Order GetOrderByUserId(shopContext shopContext, int id)
         {
+            return shopContext.Orders.FirstOrDefault(o => o.User.UserId.Equals(id));
+        }
+
+        public static (int, bool) AddOrderToDbOrGetId(shopContext shopContext, Order order)
+        {
+            int? draftId = FindDraftId(shopContext, order.UserId);
+
             order.User = null;
             order.BillingAddress = null;
             order.ShippingAddress = null;
             order.Date = DateTime.Now;
-            shopContext.Orders.Add(order);
-            shopContext.SaveChanges();
-            shopContext.Entry(order).GetDatabaseValues();
-            return order.OrderId;
+            
+            if (draftId == null)
+            {
+                shopContext.Orders.Add(order);
+                shopContext.SaveChanges();
+                shopContext.Entry(order).GetDatabaseValues();
+                return (order.OrderId, false);
+            }
+            else
+            {
+                order.OrderId = (int) draftId;
+                order.Draft = false;
+                shopContext.Orders.Update(order);
+                shopContext.SaveChanges();
+                return ((int) draftId, true);
+            }
         }
 
         public static void AddOrderedBooksToDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
@@ -156,13 +175,36 @@ namespace shop.Data
             }
         }
 
-        public static List<OrderedBook> GetListOfBooksInSavedShoppingCart(shopContext shopContext, string userId)
+        public static void DeleteOrderedBooks(shopContext shopContext, int orderId)
         {
-            var orderId = shopContext.Orders
-                .Where(o => o.User.UserAuthId == userId && o.Draft == true)
+            shopContext.RemoveRange(shopContext.BooksOrdered.Where(b=>b.OrderId == orderId));
+            shopContext.SaveChanges();
+        }
+
+        public static void UpdateOrderedBooksInDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
+        {
+            DeleteOrderedBooks(shopContext, orderId);
+            AddOrderedBooksToDb(shopContext, orderId, basket);
+            
+        }
+
+
+        public static int? FindDraftId(shopContext shopContext, int userId)
+        {
+            return shopContext.Orders
+                .Where(o => o.User.UserId == userId && o.Draft == true)
                 .OrderByDescending(o => o.Date)
                 .Select(o => o.OrderId)
                 .FirstOrDefault();
+        }
+
+        public static List<OrderedBook> GetListOfBooksInSavedShoppingCart(shopContext shopContext, string userAuthId)
+        {
+            List<OrderedBook> orderedBooks = new List<OrderedBook>();
+
+            // check if there is a draft in user's orders
+            int userId = GetUserIdById(shopContext, userAuthId);
+            int? orderId = FindDraftId(shopContext, userId);
 
             if (orderId != null)
             {
@@ -171,7 +213,6 @@ namespace shop.Data
                     .Select(b => b.BookId)
                     .ToList();
 
-                List<OrderedBook> orderedBooks = new List<OrderedBook>();
                 var hash = new HashSet<int>();
 
                 foreach (var id in bookIds)
@@ -186,11 +227,9 @@ namespace shop.Data
                         orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
                     }
                 }
-
-                return orderedBooks;
             }
-
-            return null;
+            
+            return orderedBooks;
         }
 
         public static List<OrderedBook> ChangeQuantityOfBooks(int bookId, List<OrderedBook> orderedBooks)

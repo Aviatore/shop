@@ -213,11 +213,18 @@ namespace shop.Controllers
                 scvm.Order.UserId = user.UserId;
             }*/
             
-            int orderId = Helper.AddOrderToDbOrGetId(_dbContext, scvm.Order);
+            (int orderId, bool updated) = Helper.AddOrderToDbOrGetId(_dbContext, scvm.Order);
             
             _myLogger.Add(orderId, "Order data accepted");
 
-            Helper.AddOrderedBooksToDb(_dbContext, orderId, scvm.Basket);
+            if (updated)
+            {
+                Helper.UpdateOrderedBooksInDb(_dbContext, orderId, scvm.Basket);
+            }
+            else
+            {
+                Helper.AddOrderedBooksToDb(_dbContext, orderId, scvm.Basket);
+            }
 
             return RedirectToAction("Payment", new
             {
