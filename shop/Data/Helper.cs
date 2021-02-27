@@ -98,8 +98,8 @@ namespace shop.Data
             order.Date = DateTime.Now;
             
             //TODO: real addresses
-            order.BillingAddressId = 0;
-            order.ShippingAddressId = 0;
+            order.BillingAddressId = 1;
+            order.ShippingAddressId = 1;
             
             shopContext.Orders.Add(order);
             shopContext.SaveChanges();
