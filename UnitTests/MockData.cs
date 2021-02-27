@@ -49,7 +49,6 @@ namespace UnitTests
             {
                 int randomBookId = random.Next(1, 12);
                 int randomQuantity = random.Next(1, 8);
-                tmp.Add(randomBookId);
 
                 if (!tmp.Contains(randomBookId))
                 {
@@ -60,7 +59,8 @@ namespace UnitTests
                         Title = context.Books.First(x => x.BookId == randomBookId).Title,
                         Price = context.Books.First(x => x.BookId == randomBookId).Price
                     };
-
+                    
+                    tmp.Add(randomBookId);
                     mockOrderedBooks.Add(orderedBook);
 
                     i++;

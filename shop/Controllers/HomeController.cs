@@ -228,7 +228,7 @@ namespace shop.Controllers
             });
         }
 
-        private int AddToAddressDBOrGetID(Address data)
+        public int AddToAddressDBOrGetID(Address data)
         {
             int? addressId = _dbContext.Addresses
                 .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))

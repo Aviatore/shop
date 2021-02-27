@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using FluentAssertions;
+using FluentAssertions.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using Moq;
@@ -523,6 +529,247 @@ namespace UnitTests
 
             Assert.Equal(10, totalAmount);
             Assert.Equal(906.94, totalPrice);
+        }
+        
+        [Fact(DisplayName = "AddToAddressDBOrGetID address exists")]
+        public void AddToAddressDBOrGetID_AddressExists()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var address1 = new Address
+                {
+                    Street = "Spacerowa 23",
+                    City = "Warsaw",
+                    Country = "Poland",
+                    ZipCode = "12-678"
+                };
+
+                var address2 = new Address
+                {
+                    Street = "Pl. Zwyciestwa 12",
+                    City = "Cracow",
+                    Country = "Poland",
+                    ZipCode = "12-345"
+                };
+
+                var result1 = homeController.AddToAddressDBOrGetID(address1);
+                var result2 = homeController.AddToAddressDBOrGetID(address2);
+                
+                Assert.Equal(4, result1);
+                Assert.Equal(2, result2);
+            }
+        }
+        
+        [Fact(DisplayName = "AddToAddressDBOrGetID address do not exists")]
+        public void AddToAddressDBOrGetID_AddressNotExists()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var address = new Address
+                {
+                    Street = "Testing 23",
+                    City = "Warsaw",
+                    Country = "Poland",
+                    ZipCode = "12-678"
+                };
+
+                var result = homeController.AddToAddressDBOrGetID(address);
+
+                Assert.Equal(6, result);
+            }
+        }
+        
+        [Fact(DisplayName = "CheckOut invalid model of ShoppingCartViewModel")]
+        public void CheckOut_InvalidModelOfShoppingCartViewModel()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var user = new User
+                {
+                    UserName = "Jan Nowak",
+                    Email = "test@test.pl",
+                    Phone = "+48 605 337 334"
+                };
+
+                var billingAddress = new Address
+                {
+                    Country = "Poland",
+                    City = "Warsaw",
+                    ZipCode = "01-111",
+                    Street = "Marszałkowska 123A"
+                };
+                
+                var scvm = new ShoppingCartViewModel()
+                {
+                    Order = new Order
+                    {
+                        UserId = 2,
+                        Payment = true,
+                        Draft = false,
+                        Date = new DateTime(2021, 2, 27, 9, 10, 23),
+                        Status = null,
+                        TotalPrice = 0.00,
+                        BillingAddress = billingAddress,
+                        ShippingAddress = billingAddress,
+                        User = user
+                    },
+                    Basket = MockData.GetRandomMoqOrderedBooksList().ToList(),
+                    ShippingEqualBilling = true
+                };
+
+                homeController.ModelState.AddModelError(string.Empty, "Test Error");
+ 
+                Assert.False(homeController.ModelState.IsValid, "Model state has remained valid.");
+ 
+                // Test for BadRequest being returned
+                var result = homeController.CheckOut(scvm) as ViewResult;
+                var model = result?.Model;
+ 
+                Assert.Equal("ShoppingCart", result?.ViewName);
+                Assert.True(model.IsSameOrEqualTo(scvm));
+
+            }
+        }
+        
+        [Fact(DisplayName = "CheckOut valid model of ShoppingCartViewModel same shipping and billing address")]
+        public void CheckOut_ValidModelOfShoppingCartViewModelSameAddresses()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var user = new User
+                {
+                    UserName = "Jan Nowak",
+                    Email = "test@test.pl",
+                    Phone = "+48 605 337 334"
+                };
+
+                var billingAddress = new Address
+                {
+                    Country = "Poland",
+                    City = "Warsaw",
+                    ZipCode = "01-111",
+                    Street = "Marszałkowska 123A"
+                };
+                
+                var scvm = new ShoppingCartViewModel()
+                {
+                    Order = new Order
+                    {
+                        UserId = 2,
+                        Payment = true,
+                        Draft = false,
+                        Date = new DateTime(2021, 2, 27, 9, 10, 23),
+                        Status = null,
+                        TotalPrice = 0.00,
+                        BillingAddress = billingAddress,
+                        ShippingAddress = billingAddress,
+                        User = user
+                    },
+                    Basket = MockData.GetRandomMoqOrderedBooksList().ToList(),
+                    ShippingEqualBilling = true
+                };
+
+                double totalPrice = 0;
+
+                foreach (var book in scvm.Basket)
+                {
+                    totalPrice += book.Price * book.Quantity;
+                }
+
+                totalPrice = Math.Round(totalPrice, 2, MidpointRounding.AwayFromZero);
+
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+
+                homeController.ControllerContext = controllerContext;
+                homeController.HttpContext.Session.Set("userId", "8befe3cc-024b-4084-ab38-8f5c7663cd1d");
+
+              
+                var action = homeController.CheckOut(scvm) as RedirectToActionResult;
+              
+                Assert.Equal("Payment", action?.ActionName);
+                Assert.Equal("5", action?.RouteValues["orderId"]?.ToString());
+                Assert.Equal(totalPrice.ToString(CultureInfo.InvariantCulture), action?.RouteValues["totalPrice"]?.ToString());
+            }
+        }
+        
+        [Fact(DisplayName = "CheckOut valid model of ShoppingCartViewModel different shipping and billing address")]
+        public void CheckOut_ValidModelOfShoppingCartViewModelDifferentAddresses()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var user = new User
+                {
+                    UserName = "Jan Nowak",
+                    Email = "test@test.pl",
+                    Phone = "+48 605 337 334"
+                };
+
+                var billingAddress = new Address
+                {
+                    Country = "Poland",
+                    City = "Warsaw",
+                    ZipCode = "01-111",
+                    Street = "Marszałkowska 123A"
+                };
+                
+                var shippingAddress = new Address
+                {
+                    Country = "Poland",
+                    City = "Cracow",
+                    ZipCode = "03-456",
+                    Street = "Spacerowa 31"
+                };
+                
+                var scvm = new ShoppingCartViewModel()
+                {
+                    Order = new Order
+                    {
+                        UserId = 2,
+                        Payment = true,
+                        Draft = false,
+                        Date = new DateTime(2021, 2, 27, 9, 10, 23),
+                        Status = null,
+                        TotalPrice = 0.00,
+                        BillingAddress = billingAddress,
+                        ShippingAddress = shippingAddress,
+                        User = user
+                    },
+                    Basket = MockData.GetRandomMoqOrderedBooksList().ToList(),
+                    ShippingEqualBilling = false
+                };
+
+                double totalPrice = 0;
+
+                foreach (var book in scvm.Basket)
+                {
+                    totalPrice += book.Price * book.Quantity;
+                }
+
+                totalPrice = Math.Round(totalPrice, 2, MidpointRounding.AwayFromZero);
+
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+
+                homeController.ControllerContext = controllerContext;
+                homeController.HttpContext.Session.Set("userId", "8befe3cc-024b-4084-ab38-8f5c7663cd1d");
+
+              
+                var action = homeController.CheckOut(scvm) as RedirectToActionResult;
+              
+                Assert.Equal("Payment", action?.ActionName);
+                Assert.Equal("5", action?.RouteValues["orderId"]?.ToString());
+                Assert.Equal(totalPrice.ToString(CultureInfo.InvariantCulture), action?.RouteValues["totalPrice"]?.ToString());
+            }
         }
     }
 }
