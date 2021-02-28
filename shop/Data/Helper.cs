@@ -204,9 +204,9 @@ namespace shop.Data
 
             // check if there is a draft in user's orders
             int userId = GetUserIdById(shopContext, userAuthId);
-            int? orderId = FindDraftId(shopContext, userId);
+            int orderId = FindDraftId(shopContext, userId);
 
-            if (orderId != null)
+            if (orderId != 0)
             {
                 List<int> bookIds = shopContext.BooksOrdered
                     .Where(b => b.OrderId == orderId)
