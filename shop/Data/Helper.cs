@@ -134,14 +134,14 @@ namespace shop.Data
 
         public static (int, bool) AddOrderToDbOrGetId(shopContext shopContext, Order order)
         {
-            int? draftId = FindDraftId(shopContext, order.UserId);
+            int draftId = FindDraftId(shopContext, order.UserId);
 
             order.User = null;
             order.BillingAddress = null;
             order.ShippingAddress = null;
             order.Date = DateTime.Now;
             
-            if (draftId == null)
+            if (draftId == 0)
             {
                 shopContext.Orders.Add(order);
                 shopContext.SaveChanges();
@@ -189,7 +189,7 @@ namespace shop.Data
         }
 
 
-        public static int? FindDraftId(shopContext shopContext, int userId)
+        public static int FindDraftId(shopContext shopContext, int userId)
         {
             return shopContext.Orders
                 .Where(o => o.User.UserId == userId && o.Draft == true)
