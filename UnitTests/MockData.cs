@@ -119,6 +119,21 @@ namespace UnitTests
             return mockOrderedBooks;
         }
 
+        public static PaymentViewModel GetMoqPaymentViewModel(int orderId, double totalPrice)
+        {
+            var pvm = new PaymentViewModel
+            {
+                SuccessfulPayment = false,
+                CardName = "Jan Nowak",
+                CardNumber = "3714 4963 539 8431",
+                CardExp = "12.2023",
+                CardCVV = 123,
+                OrderId = orderId,
+                TotalPrice = totalPrice
+            };
+            return pvm;
+        }
+
         public shopContext GetTestShopContext()
         {
             var options = new DbContextOptionsBuilder<shopContext>()
@@ -406,7 +421,7 @@ namespace UnitTests
                 BillingAddressId = 1,
                 ShippingAddressId = 1,
                 UserId = 1,
-                Payment = true,
+                Payment = false,
                 Draft = false,
                 Date = new DateTime(2021, 2, 18, 16, 32, 15),
                 Status = null,
@@ -422,7 +437,7 @@ namespace UnitTests
                 BillingAddressId = 2,
                 ShippingAddressId = 2,
                 UserId = 2,
-                Payment = true,
+                Payment = false,
                 Draft = false,
                 Date = new DateTime(2021, 2, 20, 12, 30, 23),
                 Status = null,
@@ -438,7 +453,7 @@ namespace UnitTests
                 BillingAddressId = 3,
                 ShippingAddressId = 3,
                 UserId = 1,
-                Payment = true,
+                Payment = false,
                 Draft = false,
                 Date = new DateTime(2021, 2, 21, 9, 12, 20),
                 Status = null,
@@ -454,7 +469,7 @@ namespace UnitTests
                 BillingAddressId = 4,
                 ShippingAddressId = 5,
                 UserId = 2,
-                Payment = true,
+                Payment = false,
                 Draft = false,
                 Date = new DateTime(2021, 2, 25, 16, 35, 59),
                 Status = null,

@@ -11,7 +11,9 @@ using FluentAssertions.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using shop;
@@ -772,7 +774,7 @@ namespace UnitTests
             }
         }
 
-        [Theory]
+        [Theory (DisplayName = "Payment check PaymentViewModel")]
         [InlineData(5, 345.78)]
         [InlineData(8, 1231.34)]
         [InlineData(1, 279.41)]
@@ -782,7 +784,7 @@ namespace UnitTests
                 MockData.MoqEmailSender(), MockData.MoqMyLogger()))
             {
                 var result = homeController.Payment(orderId, totalPrice) as ViewResult;
-                var model = result.Model as PaymentViewModel;
+                var model = result?.Model as PaymentViewModel;
 
                 Assert.NotNull(model);
                 Assert.NotNull(result);
@@ -790,6 +792,141 @@ namespace UnitTests
                 Assert.Equal(orderId, model.OrderId);
                 Assert.Equal(totalPrice, model.TotalPrice);
             } 
+        }
+        
+        [Theory (DisplayName = "OrderConfirmation check status of the order")]
+        [InlineData(true, 255.78, 1)]
+        [InlineData(true, 121.67, 2)]
+        [InlineData(true, 129.42, 3)]
+        [InlineData(false, 439.12, 2)]
+        [InlineData(false, 98.35, 3)]
+        [InlineData(false, 183.96, 4)]
+        public void OrderConfirmation_CheckStatusOfOrder(bool success, double price, int id)
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var culture = CultureInfo.CreateSpecificCulture("pl-PL");
+                
+                var controllerContext = new ControllerContext()
+                {
+                    HttpContext = new DefaultHttpContext() {Session = new MockHttpSession()}
+                };
+                
+                homeController.ControllerContext = controllerContext;
+
+                var compareContext = MockData.MoqShopContext();
+                var userId = compareContext?
+                    .Orders.Include(u => u.User)?
+                    .SingleOrDefault(o => o.OrderId == id)?.User.UserId;
+                if (userId == 1)
+                {
+                    homeController.HttpContext.Session.Set("userId", "6040582f-0c20-44dc-8acc-b684479454b0");
+                }
+                else if(userId == 2)
+                {
+                    homeController.HttpContext.Session.Set("userId", "8befe3cc-024b-4084-ab38-8f5c7663cd1d");
+                }
+                
+                var result = homeController.OrderConfirmation(success, price, id) as ViewResult;
+                (int id, double price, bool success) model = ((int id, double price, bool success)) result.Model;
+                ViewDataDictionary viewData = result?.ViewData;
+
+                if (success)
+                {
+                    Assert.Equal($"Thank You for your order! {price.ToString("0.00", culture)} zł was successfully charged from your bank account.",
+                        viewData?["Message"]);
+                }
+                else
+                {
+                    Assert.Equal($"We couldn't charge your account...",
+                        viewData?["Message"]);
+                }
+                
+                Assert.NotNull(result);
+                Assert.NotNull(viewData);
+                Assert.IsAssignableFrom<ViewResult>(result);
+                Assert.Equal("OrderConfirmation", result.ViewName);
+                Assert.Equal(id, model.id);
+                Assert.Equal(price, model.price);
+                Assert.Equal(success, model.success);
+            } 
+        }
+        
+        [Fact(DisplayName = "PaymentPost invalid model of PaymentViewModel")]
+        public void PaymentPost_InvalidModelOfPaymentViewModel()
+        {
+            using (var homeController = new HomeController(MockData.MoqLogger(), MockData.MoqShopContext(),
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var pvm = new PaymentViewModel
+                {
+                    SuccessfulPayment = false,
+                    CardName = "Jan Nowak",
+                    CardNumber = "3714 4963 539 8431",
+                    CardExp = "12.2023",
+                    CardCVV = 123,
+                    OrderId = 3,
+                    TotalPrice = 0.00
+                };
+
+                homeController.ModelState.AddModelError(string.Empty, "Test Error");
+ 
+                Assert.False(homeController.ModelState.IsValid, "Model state has remained valid.");
+ 
+                // Test for BadRequest being returned
+                var result = homeController.PaymentPost(pvm) as ViewResult;
+                var model = result?.Model;
+ 
+                Assert.Equal("Payment", result?.ViewName);
+                Assert.True(model.IsSameOrEqualTo(pvm));
+
+            }
+        }
+        
+        [Fact(DisplayName = "PaymentPost valid model of PaymentViewModel")]
+        public void PaymentPost_ValidModelOfPaymentViewModel()
+        {
+            var context = MockData.MoqShopContext();
+            
+            using (var homeController = new HomeController(MockData.MoqLogger(), context,
+                MockData.MoqEmailSender(), MockData.MoqMyLogger()))
+            {
+                var pvm1 = MockData.GetMoqPaymentViewModel(3, 499.99);
+                var pvm2 = MockData.GetMoqPaymentViewModel(1, 500.00);;
+                // Order does not exists
+                var pvm3 = MockData.GetMoqPaymentViewModel(25, 230.45);
+
+                var result1 = homeController.PaymentPost(pvm1) as RedirectToActionResult;
+                var result2 = homeController.PaymentPost(pvm2) as RedirectToActionResult;
+                var result3 = homeController.PaymentPost(pvm3) as RedirectToActionResult;
+
+                var orderPayment1 = context?.Orders?.FirstOrDefault(o => o.OrderId == pvm1.OrderId)?.Payment;
+                var orderPayment2 = context?.Orders?.FirstOrDefault(o => o.OrderId == pvm2.OrderId)?.Payment;
+                var orderPayment3 = context?.Orders?.FirstOrDefault(o => o.OrderId == pvm3.OrderId)?.Payment;
+                
+                Assert.Equal("OrderConfirmation", result1?.ActionName);
+                Assert.Equal("True", result1?.RouteValues["success"]?.ToString());
+                Assert.Equal("499.99", result1?.RouteValues["price"]?.ToString());
+                Assert.Equal("3", result1?.RouteValues["id"]?.ToString());
+                Assert.Equal(orderPayment1, pvm1.SuccessfulPayment);
+                
+                Assert.Equal("OrderConfirmation", result2?.ActionName);
+                Assert.Equal("False", result2?.RouteValues["success"]?.ToString());
+                Assert.Equal("500", result2?.RouteValues["price"]?.ToString());
+                Assert.Equal("1", result2?.RouteValues["id"]?.ToString());
+                Assert.Equal(orderPayment2, pvm2.SuccessfulPayment);
+                
+                Assert.Equal("OrderConfirmation", result3?.ActionName);
+                Assert.Equal("True", result3?.RouteValues["success"]?.ToString());
+                Assert.Equal("230.45", result3?.RouteValues["price"]?.ToString());
+                Assert.Equal("25", result3?.RouteValues["id"]?.ToString());
+                Assert.Null(orderPayment3);
+                    
+                Assert.Equal("OrderConfirmation", result1?.ActionName);
+                Assert.Equal("OrderConfirmation", result2?.ActionName);
+                Assert.Equal("OrderConfirmation", result3?.ActionName);
+            }
         }
     }
 }
