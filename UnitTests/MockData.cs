@@ -598,7 +598,7 @@ namespace UnitTests
                 Order = order4
             };
             
-            context.BooksOrdereds.AddRange(booksOrdered01, booksOrdered02, booksOrdered03,
+            context.BooksOrdered.AddRange(booksOrdered01, booksOrdered02, booksOrdered03,
                 booksOrdered04, booksOrdered05, booksOrdered06, booksOrdered07, booksOrdered08,
                 booksOrdered09, booksOrdered10, booksOrdered11, booksOrdered12, booksOrdered13);
             
