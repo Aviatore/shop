@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 
 #nullable disable
 
@@ -21,7 +22,7 @@ namespace shop.Models
         public virtual DbSet<Author> Authors { get; set; }
         public virtual DbSet<AuthorBook> AuthorBooks { get; set; }
         public virtual DbSet<Book> Books { get; set; }
-        public virtual DbSet<BooksOrdered> BooksOrdereds { get; set; }
+        public virtual DbSet<BooksOrdered> BooksOrdered { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
@@ -33,8 +34,10 @@ namespace shop.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=shop;User Id=SA;Password=YourNewStrong@Passw0rd;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=shop3;User Id=SA;Password=Gtm#Dpi7Zwt;");
             }
+
+            optionsBuilder.LogTo(Console.WriteLine, LogLevel.Information);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -156,13 +159,13 @@ namespace shop.Models
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
 
                 entity.HasOne(d => d.Book)
-                    .WithMany()
+                    .WithMany(b => b.BooksOrdereds)
                     .HasForeignKey(d => d.BookId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("books_ordered_FK_1");
 
                 entity.HasOne(d => d.Order)
-                    .WithMany()
+                    .WithMany(b => b.BooksOrdereds)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("books_ordered_FK");
@@ -218,6 +221,16 @@ namespace shop.Models
                 entity.Property(e => e.ShippingAddressId).HasColumnName("shipping_address_id");
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
+                
+                entity.Property(e => e.Draft).HasColumnName("draft");
+                
+                entity.Property(e => e.Date).HasColumnName("date");
+                
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasColumnName("status");
+                
+                entity.Property(e => e.TotalPrice).HasColumnName("total_price");
 
                 entity.HasOne(d => d.BillingAddress)
                     .WithMany(p => p.OrderBillingAddresses)
@@ -256,6 +269,11 @@ namespace shop.Models
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
 
+                entity.Property(e => e.UserAuthId)
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnName("user_auth_id");
+
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(100)
@@ -268,7 +286,6 @@ namespace shop.Models
                     .HasColumnName("phone");
 
                 entity.Property(e => e.UserName)
-                    .IsRequired()
                     .HasMaxLength(100)
                     .IsUnicode(false)
                     .HasColumnName("user_name");

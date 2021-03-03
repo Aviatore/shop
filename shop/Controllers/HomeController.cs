@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
+using shop.Data;
 using shop.Models;
 using shop.Utilities;
 using shop.Utility;
@@ -126,7 +122,7 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<OrderedBook>? orderedBooks = GetListFromCookies();
+            List<OrderedBook> orderedBooks = GetListFromCookies();
 
             if (orderedBooks != null)
             {
@@ -153,6 +149,17 @@ namespace shop.Controllers
             return RedirectToAction("ShoppingCart");
         }
 
+        public IActionResult SaveCart(string name)
+        {
+            List<OrderedBook> orderedBooks = GetListFromCookies();
+            string id = Helper.GetUserIdByEmail(_dbContext, name);
+            if (id != null)
+            {
+                Helper.SaveBasketOfLoggedInUser(_dbContext, orderedBooks, id);
+            }
+            
+            return RedirectToAction("ShoppingCart");
+        }
 
         [HttpPost]
         public IActionResult CheckOut(ShoppingCartViewModel scvm)
@@ -165,7 +172,7 @@ namespace shop.Controllers
             }
             
             Address billAdd = scvm.Order.BillingAddress;
-            scvm.Order.BillingAddressId = AddToAddressDBOrGetID(billAdd);
+            scvm.Order.BillingAddressId = Helper.AddAddressToDbOrGetID(_dbContext, billAdd);
 
             if (scvm.ShippingEqualBilling || scvm.Order.BillingAddress == scvm.Order.ShippingAddress)
             {
@@ -174,57 +181,54 @@ namespace shop.Controllers
             else
             {
                 Address shipAdd = scvm.Order.ShippingAddress;
-                scvm.Order.ShippingAddressId = AddToAddressDBOrGetID(shipAdd);   
+                scvm.Order.ShippingAddressId = Helper.AddAddressToDbOrGetID(_dbContext, shipAdd);   
             }
 
             User user = scvm.Order.User;
-            int? userId = _dbContext.Users
+
+            /*int? userId = _dbContext.Users
                 .Where(u => u.UserName.Equals(user.UserName) && u.Email.Equals(user.Email) && u.Phone.Equals(user.Phone))
                 .Select(u => (int?)u.UserId)
-                .FirstOrDefault();
+                .FirstOrDefault();*/
 
-            if (userId.HasValue)
-                scvm.Order.UserId = userId.Value;
+            var userAuthId = HttpContext.Session.Get<string>("userId");
+            scvm.Order.UserId = Helper.GetUserIdById(_dbContext, userAuthId);
+            
+            /*if (userId.HasValue)
+                //scvm.Order.UserId = userId.Value;
+            {
+                var userAuthId = HttpContext.Session.Get<string>("userId");
+                scvm.Order.UserId = Helper.GetUserIdById(_dbContext, userAuthId);
+            }
             else
             {
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
                 _dbContext.Entry(user).GetDatabaseValues();
                 scvm.Order.UserId = user.UserId;
-            }
-
-            var order = scvm.Order;
-            scvm.Order.User = null;
-            scvm.Order.BillingAddress = null;
-            scvm.Order.ShippingAddress = null;
-            _dbContext.Orders.Add(order);
-            _dbContext.SaveChanges();
-            _dbContext.Entry(order).GetDatabaseValues();
-            int orrderId = order.OrderId;
+            }*/
             
-            _myLogger.Add(orrderId, "Order data accepted");
+            (int orderId, bool updated) = Helper.AddOrderToDbOrGetId(_dbContext, scvm.Order);
+            
+            _myLogger.Add(orderId, "Order data accepted");
 
-            foreach (var item in scvm.Basket)
+            if (updated)
             {
-                var book = new BooksOrdered();
-                book.BookId = item.BookId;
-                book.OrderId = orrderId;
-                for (var i = 0; i < item.Quantity; i++)
-                {
-                    _dbContext.BooksOrdereds.Add(book);
-                }
-                _dbContext.SaveChanges();
+                Helper.UpdateOrderedBooksInDb(_dbContext, orderId, scvm.Basket);
             }
-            
+            else
+            {
+                Helper.AddOrderedBooksToDb(_dbContext, orderId, scvm.Basket);
+            }
 
             return RedirectToAction("Payment", new
             {
-                orderId = orrderId,
+                orderId = orderId,
                 totalPrice = scvm.TotalPrice()
             });
         }
 
-        private int AddToAddressDBOrGetID(Address data)
+        public int AddToAddressDBOrGetID(Address data)
         {
             int? addressId = _dbContext.Addresses
                 .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
@@ -289,7 +293,9 @@ namespace shop.Controllers
             {
                 var culture = CultureInfo.CreateSpecificCulture("pl-PL");
                 ViewData["Message"] = $"Thank You for your order! {price.ToString("0.00", culture)} zł was successfully charged from your bank account.";
+                string userId = HttpContext.Session.Get<string>("userId");
                 HttpContext.Session.Clear();
+                HttpContext.Session.Set("userId", userId);
                 
                 var order = _dbContext.Orders.Include(u => u.User).SingleOrDefault(o => o.OrderId == id);
                 if (order != null)
@@ -316,7 +322,7 @@ namespace shop.Controllers
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
 
-        private List<OrderedBook>? GetListFromCookies()
+        public List<OrderedBook> GetListFromCookies()
         {
             if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
@@ -335,7 +341,6 @@ namespace shop.Controllers
             {
                 orderedBooks = HttpContext.Session.Get<List<OrderedBook>>(WebConst.SessionCart);
             }
-
             
             if (orderedBooks.Count > 0)
             {
