@@ -12,7 +12,6 @@ namespace shop.Utilities
         private MailOptions _mailOptions;
         private SmtpClient _smtpClient;
         
-        //public EmailSender(MailOptions mailOptions)
         public EmailSender(IOptions<MailOptions> mailOptions)
         {
             _mailOptions = mailOptions.Value;

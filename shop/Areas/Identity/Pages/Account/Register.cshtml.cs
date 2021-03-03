@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using shop.Data;
+using shop.Models;
 
 namespace shop.Areas.Identity.Pages.Account
 {
@@ -23,17 +25,23 @@ namespace shop.Areas.Identity.Pages.Account
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly shopContext _shopContext;
+        private readonly ApplicationDbContext _applicationDb;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            shopContext shopContext,
+            ApplicationDbContext applicationDb)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _shopContext = shopContext;
+            _applicationDb = applicationDb;
         }
 
         [BindProperty]
@@ -90,8 +98,10 @@ namespace shop.Areas.Identity.Pages.Account
                     
                     // await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                     //     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+                    // await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+                    
+                    Helper.AddNewUser(_shopContext, _applicationDb, Input.Email);
                     
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

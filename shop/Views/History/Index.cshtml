@@ -1,0 +1,57 @@
+@using System.Globalization
+@model User;
+
+@{
+    ViewBag.Title = "Orders history";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-6">@ViewBag.Title</h1>
+    
+    <table class="table table-bordered table-striped" style="width: 100%">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Order Id</th>
+            <th>Order Date</th>
+            <th>Total Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var order in Model.Orders)
+        {
+            <tr>
+                <td><a href="#" class="btnToggle btn btn-primary" data-toggle="collapse" data-target="#order_@order.OrderId,#btn-show_@order.OrderId,#btn-hide_@order.OrderId" role="button">Show details</a></td>
+                <td>@order.OrderId.ToString()</td>
+                <td>@order.Date.ToString("D", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+                <td>@order.BooksOrdereds.Sum(x => x.Book.Price).ToString("C", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <div class="collapse" id="order_@order.OrderId">
+                        <table class="table table-striped" style="width: 100%">
+                            <thead>
+                            <tr>
+                                <th>Ordered book</th>
+                                <th>Price</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var book in order.BooksOrdereds)
+                            {
+                                <tr>
+                                    <td>@book.Book.Title</td>
+                                    <td>@book.Book.Price.ToString("C", CultureInfo.CreateSpecificCulture("pl-PL"))</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+

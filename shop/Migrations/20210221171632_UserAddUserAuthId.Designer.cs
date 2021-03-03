@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210221171632_UserAddUserAuthId")]
+    partial class UserAddUserAuthId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,10 +247,6 @@ namespace shop.Migrations
                         .HasColumnType("int")
                         .HasColumnName("billing_address_id");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("date");
-
                     b.Property<bool>("Draft")
                         .HasColumnType("bit")
                         .HasColumnName("draft");
@@ -260,15 +258,6 @@ namespace shop.Migrations
                     b.Property<int>("ShippingAddressId")
                         .HasColumnType("int")
                         .HasColumnName("shipping_address_id");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float")
-                        .HasColumnName("total_price");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int")
@@ -327,8 +316,7 @@ namespace shop.Migrations
 
                     b.Property<string>("UserAuthId")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("user_auth_id");
 
                     b.Property<string>("UserName")
@@ -383,13 +371,13 @@ namespace shop.Migrations
             modelBuilder.Entity("shop.Models.BooksOrdered", b =>
                 {
                     b.HasOne("shop.Models.Book", "Book")
-                        .WithMany("BooksOrdereds")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .HasConstraintName("books_ordered_FK_1")
                         .IsRequired();
 
                     b.HasOne("shop.Models.Order", "Order")
-                        .WithMany("BooksOrdereds")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .HasConstraintName("books_ordered_FK")
                         .IsRequired();
@@ -444,11 +432,6 @@ namespace shop.Migrations
                     b.Navigation("OrderShippingAddresses");
                 });
 
-            modelBuilder.Entity("shop.Models.Book", b =>
-                {
-                    b.Navigation("BooksOrdereds");
-                });
-
             modelBuilder.Entity("shop.Models.Genre", b =>
                 {
                     b.Navigation("Books");
@@ -456,8 +439,6 @@ namespace shop.Migrations
 
             modelBuilder.Entity("shop.Models.Order", b =>
                 {
-                    b.Navigation("BooksOrdereds");
-
                     b.Navigation("Logs");
                 });
 

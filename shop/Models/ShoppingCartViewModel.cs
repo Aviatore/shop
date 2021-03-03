@@ -47,6 +47,8 @@ namespace shop.Models
             {
                 totalPrice += orderedBook.Price * orderedBook.Quantity;
             }
+
+            totalPrice = Math.Round(totalPrice, 2, MidpointRounding.AwayFromZero);
             
             return totalPrice;
         }
