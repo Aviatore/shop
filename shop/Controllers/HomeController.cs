@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using shop.Data;
 using shop.Models;
@@ -127,7 +122,7 @@ namespace shop.Controllers
 
         public IActionResult ShoppingCart()
         {
-            List<OrderedBook>? orderedBooks = GetListFromCookies();
+            List<OrderedBook> orderedBooks = GetListFromCookies();
 
             if (orderedBooks != null)
             {
@@ -232,7 +227,24 @@ namespace shop.Controllers
                 totalPrice = scvm.TotalPrice()
             });
         }
-        
+
+        public int AddToAddressDBOrGetID(Address data)
+        {
+            int? addressId = _dbContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                _dbContext.Addresses.Add(data);
+                _dbContext.SaveChanges();
+                _dbContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
         
         public IActionResult Payment(int orderId, double totalPrice)
         {
@@ -252,7 +264,7 @@ namespace shop.Controllers
                 return View("Payment", pvm);
             }
 
-            // THIS IF IS TO TEST ONLY!
+            // TO TEST ONLY!
             if (pvm.TotalPrice < 500)
             {
                 pvm.SuccessfulPayment = true;
@@ -297,7 +309,9 @@ namespace shop.Controllers
             {
                 ViewData["Message"] = "We couldn't charge your account...";
             }
-            
+
+            //email
+
             return View("OrderConfirmation", (id, price, success));
         }
 
@@ -308,7 +322,7 @@ namespace shop.Controllers
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
         }
 
-        private List<OrderedBook> GetListFromCookies()
+        public List<OrderedBook> GetListFromCookies()
         {
             if (HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart) != null
                 && HttpContext.Session.Get<IEnumerable<OrderedBook>>(WebConst.SessionCart).Any())
@@ -338,7 +352,7 @@ namespace shop.Controllers
                         var sum = book.Quantity + quantity;
                         book.Quantity = sum;
                         isAdd = true;
-            
+
                         if (book.Quantity <= 0)
                         {
                             orderedBooks.Remove(book);
@@ -346,7 +360,7 @@ namespace shop.Controllers
                         break;
                     }
                 }
-            
+
                 if (!isAdd)
                 {
                     orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
@@ -355,7 +369,7 @@ namespace shop.Controllers
                 {
                     isAdd = false;
                 }
-            
+
             }
             else
             {
