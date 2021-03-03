@@ -19,6 +19,7 @@ namespace shop.Models
         public double Price { get; set; }
         public virtual Genre Genre { get; set; }
         public virtual Publisher Publisher { get; set; }
+        public virtual ICollection<BooksOrdered> BooksOrdereds { get; set; }
     }
 }
 

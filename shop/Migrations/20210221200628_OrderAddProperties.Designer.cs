@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using shop.Models;
 
 namespace shop.Migrations
 {
     [DbContext(typeof(shopContext))]
-    partial class shopContextModelSnapshot : ModelSnapshot
+    [Migration("20210221200628_OrderAddProperties")]
+    partial class OrderAddProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,13 +385,13 @@ namespace shop.Migrations
             modelBuilder.Entity("shop.Models.BooksOrdered", b =>
                 {
                     b.HasOne("shop.Models.Book", "Book")
-                        .WithMany("BooksOrdereds")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .HasConstraintName("books_ordered_FK_1")
                         .IsRequired();
 
                     b.HasOne("shop.Models.Order", "Order")
-                        .WithMany("BooksOrdereds")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .HasConstraintName("books_ordered_FK")
                         .IsRequired();
@@ -444,11 +446,6 @@ namespace shop.Migrations
                     b.Navigation("OrderShippingAddresses");
                 });
 
-            modelBuilder.Entity("shop.Models.Book", b =>
-                {
-                    b.Navigation("BooksOrdereds");
-                });
-
             modelBuilder.Entity("shop.Models.Genre", b =>
                 {
                     b.Navigation("Books");
@@ -456,8 +453,6 @@ namespace shop.Migrations
 
             modelBuilder.Entity("shop.Models.Order", b =>
                 {
-                    b.Navigation("BooksOrdereds");
-
                     b.Navigation("Logs");
                 });
 

@@ -2,8 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using shop.Controllers;
 using shop.Models;
+using shop.Utility;
 
 namespace shop.Data
 {
@@ -49,6 +53,223 @@ namespace shop.Data
                     }
                 }
              */
+        }
+
+        public static void AddNewUser(shopContext shopContext, ApplicationDbContext applicationDbContext, string email)
+        {
+            var userAuth = applicationDbContext.Users.FirstOrDefault(u => u.Email.Equals(email));
+            
+            if (userAuth != null)
+            {
+                User user = new User()
+                {
+                    Email = email,
+                    UserAuthId = userAuth.Id
+                };
+
+                shopContext.Users.Add(user);
+                shopContext.SaveChanges();
+            }
+        }
+
+        public static string GetUserIdByEmail(shopContext shopContext, string email)
+        {
+            var user = shopContext.Users.FirstOrDefault(u => u.Email.Equals(email));
+        
+            return user?.UserAuthId;
+        }
+        
+        public static int GetUserIdById(shopContext shopContext, string id)
+        {
+            var user = shopContext.Users.First(u => u.UserAuthId == id);
+
+            return user.UserId;
+        }
+        
+        
+
+        public static void SaveBasketOfLoggedInUser(shopContext shopContext, List<OrderedBook> list, string authId)
+        {
+            int userId = GetUserIdById(shopContext, authId);
+            
+            var order = new Order();
+            order.UserId = userId;
+            order.Draft = true;
+            order.Date = DateTime.Now;
+            
+            //TODO: real addresses
+            order.BillingAddressId = 1;
+            order.ShippingAddressId = 1;
+            
+            shopContext.Orders.Add(order);
+            shopContext.SaveChanges();
+            shopContext.Entry(order).GetDatabaseValues();
+            int orderId = order.OrderId;
+
+            AddOrderedBooksToDb(shopContext, orderId, list);
+        }
+        
+        public static int AddAddressToDbOrGetID(shopContext shopContext, Address data)
+        {
+            int? addressId = shopContext.Addresses
+                .Where(a => a.Country.Equals(data.Country) && a.City.Equals(data.City) && a.ZipCode.Equals(data.ZipCode) && a.Street.Equals(data.Street))
+                .Select(a => (int?)a.AddressId)
+                .FirstOrDefault();
+
+            if (addressId.HasValue)
+                return addressId.Value;
+            else
+            {
+                shopContext.Addresses.Add(data);
+                shopContext.SaveChanges();
+                shopContext.Entry(data).GetDatabaseValues();
+                return data.AddressId;
+            }
+        }
+
+        public static Order GetOrderByUserId(shopContext shopContext, int id)
+        {
+            return shopContext.Orders.FirstOrDefault(o => o.User.UserId.Equals(id));
+        }
+
+        public static (int, bool) AddOrderToDbOrGetId(shopContext shopContext, Order order)
+        {
+            int draftId = FindDraftId(shopContext, order.UserId);
+
+            order.User = null;
+            order.BillingAddress = null;
+            order.ShippingAddress = null;
+            order.Date = DateTime.Now;
+            
+            if (draftId == 0)
+            {
+                shopContext.Orders.Add(order);
+                shopContext.SaveChanges();
+                shopContext.Entry(order).GetDatabaseValues();
+                return (order.OrderId, false);
+            }
+            else
+            {
+                order.OrderId = (int) draftId;
+                order.Draft = false;
+                shopContext.Orders.Update(order);
+                shopContext.SaveChanges();
+                return ((int) draftId, true);
+            }
+        }
+
+        public static void AddOrderedBooksToDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
+        {
+            foreach (var item in basket)
+            {
+                IList<BooksOrdered> booksOrdereds = new List<BooksOrdered>();
+                for (var i = 0; i < item.Quantity; i++)
+                {
+                    var book = new BooksOrdered();
+                    book.BookId = item.BookId;
+                    book.OrderId = orderId;
+                    booksOrdereds.Add(book);
+                }
+                shopContext.BooksOrdered.AddRange(booksOrdereds);
+                shopContext.SaveChanges();
+            }
+        }
+
+        public static void DeleteOrderedBooks(shopContext shopContext, int orderId)
+        {
+            shopContext.RemoveRange(shopContext.BooksOrdered.Where(b=>b.OrderId == orderId));
+            shopContext.SaveChanges();
+        }
+
+        public static void UpdateOrderedBooksInDb(shopContext shopContext, int orderId, List<OrderedBook> basket)
+        {
+            DeleteOrderedBooks(shopContext, orderId);
+            AddOrderedBooksToDb(shopContext, orderId, basket);
+            
+        }
+
+
+        public static int FindDraftId(shopContext shopContext, int userId)
+        {
+            return shopContext.Orders
+                .Where(o => o.User.UserId == userId && o.Draft == true)
+                .OrderByDescending(o => o.Date)
+                .Select(o => o.OrderId)
+                .FirstOrDefault();
+        }
+
+        public static List<OrderedBook> GetListOfBooksInSavedShoppingCart(shopContext shopContext, string userAuthId)
+        {
+            List<OrderedBook> orderedBooks = new List<OrderedBook>();
+
+            // check if there is a draft in user's orders
+            int userId = GetUserIdById(shopContext, userAuthId);
+            int orderId = FindDraftId(shopContext, userId);
+
+            if (orderId != 0)
+            {
+                List<int> bookIds = shopContext.BooksOrdered
+                    .Where(b => b.OrderId == orderId)
+                    .Select(b => b.BookId)
+                    .ToList();
+
+                var hash = new HashSet<int>();
+
+                foreach (var id in bookIds)
+                {
+                    int quantity = 0;
+                    if (hash.Add(id))
+                    {
+                        quantity = bookIds
+                            .Where(i => i == id)
+                            .Count();
+                    
+                        orderedBooks.Add(new OrderedBook {BookId = id, Quantity = quantity});
+                    }
+                }
+            }
+            
+            return orderedBooks;
+        }
+
+        public static List<OrderedBook> ChangeQuantityOfBooks(int bookId, List<OrderedBook> orderedBooks)
+        {
+            if (orderedBooks.Count > 0)
+            {
+                bool isAdd = false;
+                foreach (var book in orderedBooks)
+                {
+                    if (book.BookId == bookId)
+                    {
+                        var sum = book.Quantity++;
+                        book.Quantity = sum;
+                        isAdd = true;
+
+                        if (book.Quantity <= 0)
+                        {
+                            orderedBooks.Remove(book);
+                        }
+
+                        break;
+                    }
+                }
+
+                if (!isAdd)
+                {
+                    orderedBooks.Add(new OrderedBook {BookId = bookId, Quantity = 1});
+                }
+                else
+                {
+                    isAdd = false;
+                }
+
+            }
+            else
+            {
+                orderedBooks.Add(new OrderedBook {BookId = bookId, Quantity = 1});
+            }
+
+            return orderedBooks;
         }
     }
 }
